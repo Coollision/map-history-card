@@ -112,7 +112,7 @@ views:
 | `default_hours` | number | `12` | Length of the initial "last N hours" window. |
 | `max_points` | number | `300` | Hoverable points per trail. The drawn line always uses every point; only the dots are thinned. |
 | `height` | number (px) | fills the view | Fixed card height. Leave unset in a panel view. |
-| `language` | string | your HA language | Force the card's language (`en`, `nl`). Falls back to English for unsupported languages. |
+| `language` | string | your HA language | Force the card's language, see [Languages](#languages). Falls back to English for unsupported ones. |
 
 ### Using the card
 
@@ -142,9 +142,21 @@ Like Home Assistant's map, every entity gets a colour from the theme's `--color-
 
 ## Languages
 
-The card follows your Home Assistant language (Profile → Language). Included: **English** and **Dutch**. Anything else shows English, with dates and times still formatted for your locale. To force a language for one card, set `language: nl` (or `en`).
+The card follows your Home Assistant language (Profile → Language). To force a language for one card, set `language: de` (any code below).
 
-Adding a language takes a few minutes: in [`map-history-card.js`](map-history-card.js), copy the `en` block of the `STRINGS` table under your language code and translate the values, keeping `{placeholders}` as they are. Pull requests are welcome.
+| Code | Language | Code | Language |
+|---|---|---|---|
+| `en` | English (fallback) | `pl` | Polski |
+| `nl` | Nederlands | `pt` | Português (also used for `pt-BR`) |
+| `de` | Deutsch | `ru` | Русский |
+| `fr` | Français | `zh` | 简体中文 (Simplified Chinese) |
+| `es` | Español | `it` | Italiano |
+
+Any other language shows English, with dates and times still formatted for your locale.
+
+The English and Dutch texts were written by the author; the other eight are machine-assisted translations that nobody has proofread natively yet. Corrections are very welcome as a pull request or issue.
+
+**Adding or fixing a language:** in [`map-history-card.js`](map-history-card.js), copy the `en` block of the `STRINGS` table under your language code and translate the values, keeping `{placeholders}` exactly as they are. CI runs [`scripts/check-translations.mjs`](scripts/check-translations.mjs) and fails if a key or placeholder is missing, so run `node scripts/check-translations.mjs` before you push.
 
 ## Updates and releases
 
