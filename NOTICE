@@ -1,0 +1,39 @@
+Map History Card
+Copyright 2026 Youri Declerck
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+This is an unofficial community project. It is not affiliated with, endorsed
+by, or sponsored by Home Assistant, Nabu Casa, Inc. or the Open Home
+Foundation. "Home Assistant" is a trademark of its respective owner and is
+used here only to describe compatibility.
+
+Attribution and third-party material
+------------------------------------
+
+Home Assistant frontend (Apache License 2.0)
+  https://github.com/home-assistant/frontend
+  The visual design of this card (overview panel layout, tab control, bottom
+  sheet behaviour, marker frames and bubbles, zone circles, popup styling,
+  spacing/radius/colour tokens, the entity-colour ordering and the
+  contrasting-icon-colour rule) is modelled on the Home Assistant frontend's
+  map card (src/panels/lovelace/cards/hui-map-card.ts, map/hui-map-overview.ts,
+  src/components/map/*, src/common/map/*). The tile-proxy access protocol
+  (websocket command "map_tiles/access_token", header "X-Map-Tiles-Token")
+  follows src/data/map_tiles.ts. This card was written independently in plain
+  JavaScript; no Home Assistant source files are redistributed, but its
+  behaviour and appearance derive from that work. Copyright (c) Home Assistant
+  contributors / Nabu Casa, Inc. Licensed under Apache-2.0.
+
+MapLibre GL JS (BSD 3-Clause)
+  https://github.com/maplibre/maplibre-gl-js
+  Loaded at runtime from the jsDelivr CDN; it is not bundled in this repository.
+
+Map style and data (not part of this repository)
+  The card fetches Home Assistant's own map style (/static/map/*.json) and
+  vector tiles from your Home Assistant instance. The style is based on the
+  VersaTiles "colorful" style (https://github.com/versatiles-org/node-versatiles-style)
+  repainted by the Open Home Foundation; the tiles use the Shortbread schema and
+  are built from OpenStreetMap data, (c) OpenStreetMap contributors, available
+  under the Open Database License (https://www.openstreetmap.org/copyright).
+  The map shows the required attribution automatically.
