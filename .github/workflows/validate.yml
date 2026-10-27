@@ -25,3 +25,17 @@ jobs:
         with:
           node-version: 22
       - run: node --check map-history-card.js
+  cdn:
+    name: CDN assets exist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: MapLibre files are reachable on jsDelivr
+        run: |
+          v=$(sed -n 's/^const MAPLIBRE_VERSION = "\(.*\)";/\1/p' map-history-card.js)
+          echo "MapLibre $v"
+          for f in maplibre-gl.js maplibre-gl.css; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "https://cdn.jsdelivr.net/npm/maplibre-gl@$v/dist/$f")
+            echo "$f -> $code"
+            [ "$code" = 200 ] || exit 1
+          done

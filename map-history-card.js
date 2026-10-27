@@ -36,6 +36,7 @@
 // a self-contained UMD + inline worker; HA's light/dark style JSON validates
 // against its style spec.
 const MAPLIBRE_VERSION = "5.24.0";
+const CARD_VERSION = "0.0.0"; // x-release-please-version
 const MAPLIBRE_CSS = "https://cdn.jsdelivr.net/npm/maplibre-gl@" + MAPLIBRE_VERSION + "/dist/maplibre-gl.css";
 const MAPLIBRE_JS = "https://cdn.jsdelivr.net/npm/maplibre-gl@" + MAPLIBRE_VERSION + "/dist/maplibre-gl.js";
 
@@ -1484,6 +1485,7 @@ class MapHistoryCard extends HTMLElement {
 }
 
 customElements.define("map-history-card", MapHistoryCard);
+console.info("%c MAP-HISTORY-CARD %c v" + CARD_VERSION + " ", "color:#fff;background:#03a9f4;font-weight:700", "color:#03a9f4;background:#fff;font-weight:700");
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "map-history-card",

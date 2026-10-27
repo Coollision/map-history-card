@@ -26,7 +26,7 @@ Home Assistant's built-in map card shows where things are now, and its new overv
 |---|---|
 | Home Assistant | **2026.10 or newer.** The card uses the vector-map tile proxy and styles added in that release. |
 | Browser | WebGL2 (any current desktop or mobile browser). Without it the card shows a message instead of a map. |
-| Network | The browser must reach `cdn.jsdelivr.net` once to load the MapLibre library. Map tiles are fetched through your own Home Assistant instance, not from the internet directly. |
+| Network | The browser must reach `cdn.jsdelivr.net` once to load the MapLibre library. Map tiles are fetched through **your own** Home Assistant instance (the card never talks to anyone else's), not from the internet directly. |
 | Recorder | Location history comes from the recorder, so entities need to be recorded (the default). |
 
 ## Installation
@@ -138,6 +138,10 @@ Like Home Assistant's map, every entity gets a colour from the theme's `--color-
 - **"Deze browser ondersteunt geen WebGL2".** Your browser or device cannot do WebGL2. Home Assistant's own map falls back to a raster map there; this card does not.
 - **Card looks stale after an update.** Hard-refresh, and bump the `?v=` on a manual resource URL.
 - **No trail for a tracker.** The entity must record `latitude`/`longitude` attributes in the recorder. Router-based trackers only draw approximate zone positions.
+
+## Updates and releases
+
+Versions follow [semantic versioning](https://semver.org) and are produced automatically from [conventional commits](https://www.conventionalcommits.org) (`feat:` → minor, `fix:` → patch, `feat!:` → major) by [release-please](https://github.com/googleapis/release-please). Each release attaches `map-history-card.js`, which HACS downloads, so HACS shows a normal update when a new version ships. The MapLibre version the card loads is kept current by Renovate within the 5.x line, and the GitHub Actions by Dependabot. Changes are listed in [CHANGELOG.md](CHANGELOG.md) and the [releases page](https://github.com/Coollision/map-history-card/releases).
 
 ## Known limitations
 
