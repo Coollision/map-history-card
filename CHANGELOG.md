@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/Coollision/map-history-card/compare/v0.1.0...v0.1.1) (2026-10-27)
+
+
+### Bug Fixes
+
+* keep the saved/default selection while the roster is still loading ([91b3446](https://github.com/Coollision/map-history-card/commit/91b3446d914d3c910895a8fd937ec9cddf730eab))
+
 ## 0.1.0 (2026-10-27)
 
 
