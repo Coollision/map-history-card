@@ -36,7 +36,7 @@
 // a self-contained UMD + inline worker; HA's light/dark style JSON validates
 // against its style spec.
 const MAPLIBRE_VERSION = "5.24.0";
-const CARD_VERSION = "0.1.1"; // x-release-please-version
+const CARD_VERSION = "0.2.0"; // x-release-please-version
 const MAPLIBRE_CSS = "https://cdn.jsdelivr.net/npm/maplibre-gl@" + MAPLIBRE_VERSION + "/dist/maplibre-gl.css";
 const MAPLIBRE_JS = "https://cdn.jsdelivr.net/npm/maplibre-gl@" + MAPLIBRE_VERSION + "/dist/maplibre-gl.js";
 
