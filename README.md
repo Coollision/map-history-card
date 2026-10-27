@@ -112,12 +112,13 @@ views:
 | `default_hours` | number | `12` | Length of the initial "last N hours" window. |
 | `max_points` | number | `300` | Hoverable points per trail. The drawn line always uses every point; only the dots are thinned. |
 | `height` | number (px) | fills the view | Fixed card height. Leave unset in a panel view. |
+| `language` | string | your HA language | Force the card's language (`en`, `nl`). Falls back to English for unsupported languages. |
 
 ### Using the card
 
 - **Tabs** switch between people and devices. Tap a row to show or hide that entity's trail; its ring colour is its trail colour.
-- **alles / geen / standaard / omkeren** select all, none, the default selection, or invert, within the current tab.
-- **Periode** holds the quick ranges and the exact start and end. Change them or press **Ververs** to reload.
+- **all / none / default / invert** (*alles / geen / standaard / omkeren* in Dutch) select all, none, the default selection, or invert, within the current tab.
+- **Period** holds the quick ranges and the exact start and end. Change them or press **Refresh** to reload.
 - **Top-right buttons:** group or ungroup overlapping people (a bubble shows who is stacked; tap it to zoom in) and reset the view to fit the trails.
 - **Phone:** drag the handle of the bottom sheet, or tap it, to move between peek, half and full height.
 
@@ -133,11 +134,17 @@ Like Home Assistant's map, every entity gets a colour from the theme's `--color-
 
 ## Troubleshooting
 
-- **"MapLibre kon niet geladen worden" / "MapLibre could not be loaded".** The browser could not reach `cdn.jsdelivr.net` (ad blocker, DNS filter, offline). Allow that host, or tell me and I will look at self-hosting the library.
+- **"MapLibre could not be loaded".** The browser could not reach `cdn.jsdelivr.net` (ad blocker, DNS filter, offline). Allow that host, or tell me and I will look at self-hosting the library.
 - **Blank grey map.** Tiles are being refused, usually because the tile token is missing. Check you run Home Assistant 2026.10+, then look at the browser console and network tab for 403 responses on `/api/map_tiles/...`.
-- **"Deze browser ondersteunt geen WebGL2".** Your browser or device cannot do WebGL2. Home Assistant's own map falls back to a raster map there; this card does not.
+- **"This browser does not support WebGL2".** Your browser or device cannot do WebGL2. Home Assistant's own map falls back to a raster map there; this card does not.
 - **Card looks stale after an update.** Hard-refresh, and bump the `?v=` on a manual resource URL.
 - **No trail for a tracker.** The entity must record `latitude`/`longitude` attributes in the recorder. Router-based trackers only draw approximate zone positions.
+
+## Languages
+
+The card follows your Home Assistant language (Profile → Language). Included: **English** and **Dutch**. Anything else shows English, with dates and times still formatted for your locale. To force a language for one card, set `language: nl` (or `en`).
+
+Adding a language takes a few minutes: in [`map-history-card.js`](map-history-card.js), copy the `en` block of the `STRINGS` table under your language code and translate the values, keeping `{placeholders}` as they are. Pull requests are welcome.
 
 ## Updates and releases
 
@@ -145,7 +152,6 @@ Versions follow [semantic versioning](https://semver.org) and are produced autom
 
 ## Known limitations
 
-- The interface text is currently **Dutch only**. Translations are planned.
 - No visual card editor yet; configure in YAML.
 - No raster fallback for devices without WebGL2.
 - MapLibre 5.24 is used instead of the 6.x that Home Assistant ships, because 6.x has no single-file build that a custom card can load from a CDN.
