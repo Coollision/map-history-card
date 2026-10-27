@@ -53,10 +53,74 @@ const FALLBACK_COLORS = [
   "#e6194b", "#3cb44b", "#4363d8", "#f58231", "#911eb4", "#46f0f0",
   "#f032e6", "#9a6324", "#808000", "#008080", "#e6beff", "#800000",
 ];
-const QUICK_RANGES = [
-  { h: 3, label: "3u" }, { h: 12, label: "12u" }, { h: 24, label: "24u" },
-  { h: 72, label: "3d" }, { h: 168, label: "7d" },
-];
+// UI strings. English is the fallback for any missing key or language.
+// To add a language, copy the `en` block under its ISO 639-1 code (nl, fr, de, ...).
+// {name}-style placeholders are filled in by _t().
+const STRINGS = {
+  en: {
+    tabPeople: "People", tabDevices: "Devices",
+    all: "all", none: "none", default: "default", invert: "invert",
+    period: "Period", from: "From", to: "To", refresh: "Refresh", customRange: "custom range",
+    unitHour: "h", unitDay: "d",
+    handleLabel: "Move the panel up or down",
+    groupOn: "Group overlapping markers", groupOff: "Show markers separately",
+    resetView: "Reset view",
+    home: "Home", notHome: "Away", unknown: "Unknown",
+    noPeople: "No people found.", noDevices: "No devices found.",
+    summary: "{n} of {total} selected · {range}",
+    pickSome: "Pick one or more people or devices.",
+    pickStart: "Pick a valid start date.",
+    endAfterStart: "The end date must be after the start date.",
+    loading: "Loading history…",
+    loadFailed: "Could not load history: {msg}",
+    noData: "No location data found for this period.",
+    noWebGL: "This browser does not support WebGL2, so the vector map cannot be drawn.",
+    maplibreFailed: "MapLibre could not be loaded (is cdn.jsdelivr.net blocked?)",
+    mapFailed: "Could not load the map: {msg}",
+    zoneTip: "{name} · radius {m} m",
+    nowTitle: "{name} — now", startTitle: "{name} — start",
+    approxZone: "~ position from zone {zone} (no GPS)", approxNoZone: "~ position from zone (no GPS)",
+    tipStatus: "status", tipAccuracy: "accuracy", tipSpeed: "speed", tipAltitude: "altitude",
+    tipCourse: "heading", tipBattery: "battery", tipSource: "source", speedUnit: "km/h",
+  },
+  nl: {
+    tabPeople: "Mensen", tabDevices: "Apparaten",
+    all: "alles", none: "geen", default: "standaard", invert: "omkeren",
+    period: "Periode", from: "Van", to: "Tot", refresh: "Ververs", customRange: "eigen periode",
+    unitHour: "u", unitDay: "d",
+    handleLabel: "Paneel omhoog of omlaag",
+    groupOn: "Overlappende markers groeperen", groupOff: "Markers los tonen",
+    resetView: "Zoom herstellen",
+    home: "Thuis", notHome: "Onderweg", unknown: "Onbekend",
+    noPeople: "Geen personen gevonden.", noDevices: "Geen apparaten gevonden.",
+    summary: "{n} van {total} geselecteerd · {range}",
+    pickSome: "Kies een of meerdere personen of apparaten.",
+    pickStart: "Kies een geldige startdatum.",
+    endAfterStart: "Einddatum moet na de startdatum liggen.",
+    loading: "Geschiedenis laden…",
+    loadFailed: "Kon geschiedenis niet laden: {msg}",
+    noData: "Geen locatiegegevens gevonden voor deze periode.",
+    noWebGL: "Deze browser ondersteunt geen WebGL2, dus de vectorkaart kan niet getekend worden.",
+    maplibreFailed: "MapLibre kon niet geladen worden (wordt cdn.jsdelivr.net geblokkeerd?)",
+    mapFailed: "Kaart laden mislukt: {msg}",
+    zoneTip: "{name} · straal {m} m",
+    nowTitle: "{name} — nu", startTitle: "{name} — start",
+    approxZone: "~ positie via zone {zone} (geen GPS)", approxNoZone: "~ positie via zone (geen GPS)",
+    tipStatus: "status", tipAccuracy: "nauwkeurigheid", tipSpeed: "snelheid", tipAltitude: "hoogte",
+    tipCourse: "richting", tipBattery: "batterij", tipSource: "bron", speedUnit: "km/u",
+  },
+};
+
+// `language` in the card config wins, then the user's HA language; the base
+// code ("nl" out of "nl-BE") picks the table, the full tag formats dates.
+function resolveLanguage(config, hass) {
+  const raw = (config && config.language) ||
+    (hass && hass.locale && hass.locale.language) || (hass && hass.language) || "en";
+  const base = String(raw).toLowerCase().split("-")[0];
+  return { code: STRINGS[base] ? base : "en", locale: String(raw) };
+}
+
+const QUICK_RANGES = [3, 12, 24, 72, 168].map((h) => ({ h }));
 
 const MDI_RESET = "mdi:image-filter-center-focus";
 const MDI_GROUP_ON = "mdi:google-circles-communities";
@@ -72,7 +136,7 @@ function loadMapLibre() {
       script.onload = () => resolve(window.maplibregl);
       script.onerror = () => {
         maplibrePromise = undefined;
-        reject(new Error("MapLibre kon niet geladen worden"));
+        reject(new Error("maplibre-load-failed"));
       };
       document.head.appendChild(script);
     });
@@ -385,10 +449,23 @@ class MapHistoryCard extends HTMLElement {
     this._token = undefined;
   }
 
+  // Translated string with {placeholder} substitution; falls back to English.
+  _t(key, vars) {
+    const table = STRINGS[this._lang ? this._lang.code : "en"] || STRINGS.en;
+    let text = table[key] !== undefined ? table[key] : (STRINGS.en[key] !== undefined ? STRINGS.en[key] : key);
+    if (vars) for (const k of Object.keys(vars)) text = text.split("{" + k + "}").join(String(vars[k]));
+    return text;
+  }
+
+  _rangeLabel(h) {
+    return h % 24 === 0 && h >= 48 ? (h / 24) + this._t("unitDay") : h + this._t("unitHour");
+  }
+
   setConfig(config) {
     if (!config || typeof config !== "object") throw new Error("Invalid configuration");
     const first = !this._config;
     this._config = config;
+    if (this._hass) this._lang = resolveLanguage(config, this._hass);
     if (first) {
       this._built = false;
       return;
@@ -403,6 +480,7 @@ class MapHistoryCard extends HTMLElement {
   set hass(hass) {
     const wasDark = this._dark;
     this._hass = hass;
+    this._lang = resolveLanguage(this._config, hass);
     this._dark = Boolean(hass.themes && hass.themes.darkMode);
     if (!this._built) {
       this._build();
@@ -458,33 +536,33 @@ class MapHistoryCard extends HTMLElement {
       '  <div id="map"></div>' +
       '  <div id="buttons"></div>' +
       '  <div id="overview">' +
-      '    <div id="handle" role="button" tabindex="0" aria-label="Paneel omhoog of omlaag"></div>' +
+      '    <div id="handle" role="button" tabindex="0" aria-label="' + this._t("handleLabel") + '"></div>' +
       '    <div class="tabs" role="tablist" style="--tab-count:2;--tab-index:0">' +
       '      <div class="pill"></div>' +
       '      <div class="tablist">' +
-      '        <button role="tab" data-tab="person" aria-selected="true">Mensen</button>' +
-      '        <button role="tab" data-tab="device_tracker" aria-selected="false">Apparaten</button>' +
+      '        <button role="tab" data-tab="person" aria-selected="true">' + this._t("tabPeople") + '</button>' +
+      '        <button role="tab" data-tab="device_tracker" aria-selected="false">' + this._t("tabDevices") + '</button>' +
       "      </div>" +
       "    </div>" +
       '    <div class="actions">' +
-      '      <button class="chip" data-act="all">alles</button>' +
-      '      <button class="chip" data-act="none">geen</button>' +
-      '      <button class="chip" data-act="default">standaard</button>' +
-      '      <button class="chip" data-act="invert">omkeren</button>' +
+      '      <button class="chip" data-act="all">' + this._t("all") + '</button>' +
+      '      <button class="chip" data-act="none">' + this._t("none") + '</button>' +
+      '      <button class="chip" data-act="default">' + this._t("default") + '</button>' +
+      '      <button class="chip" data-act="invert">' + this._t("invert") + '</button>' +
       "    </div>" +
       '    <div class="list" role="group"></div>' +
       '    <div class="summary"></div>' +
       '    <div class="status" aria-live="polite"></div>' +
       '    <div class="range open">' +
-      '      <button class="range-head" aria-expanded="true"><span class="label">Periode</span>' +
+      '      <button class="range-head" aria-expanded="true"><span class="label">' + this._t("period") + '</span>' +
       '        <span class="hint"></span><ha-icon icon="mdi:chevron-down"></ha-icon></button>' +
       '      <div class="range-body">' +
       '        <div class="chips"></div>' +
       '        <div class="dates">' +
-      '          <label>Van<input type="datetime-local" class="start"></label>' +
-      '          <label>Tot<input type="datetime-local" class="end"></label>' +
+      '          <label>' + this._t("from") + '<input type="datetime-local" class="start"></label>' +
+      '          <label>' + this._t("to") + '<input type="datetime-local" class="end"></label>' +
       "        </div>" +
-      '        <button class="refresh">Ververs</button>' +
+      '        <button class="refresh">' + this._t("refresh") + '</button>' +
       "      </div>" +
       "    </div>" +
       "  </div>" +
@@ -515,13 +593,13 @@ class MapHistoryCard extends HTMLElement {
     this._fitHeight();
 
     if (!supportsWebGL2()) {
-      this._setStatus("Deze browser ondersteunt geen WebGL2, dus de vectorkaart kan niet getekend worden.");
+      this._setStatus(this._t("noWebGL"));
       return;
     }
     try {
       this._maplibre = await loadMapLibre();
     } catch (err) {
-      this._setStatus(err.message);
+      this._setStatus(this._t("maplibreFailed"));
       return;
     }
     this._initMapWhenSized();
@@ -529,8 +607,8 @@ class MapHistoryCard extends HTMLElement {
 
   _buildButtons() {
     this._buttonsEl.innerHTML =
-      '<button class="group" aria-label="Markers groeperen"><ha-icon></ha-icon></button>' +
-      '<button class="reset" aria-label="Zoom herstellen" title="Zoom herstellen"><ha-icon icon="' + MDI_RESET + '"></ha-icon></button>';
+      '<button class="group"><ha-icon></ha-icon></button>' +
+      '<button class="reset" aria-label="' + this._t("resetView") + '" title="' + this._t("resetView") + '"><ha-icon icon="' + MDI_RESET + '"></ha-icon></button>';
     this._groupBtn = this._buttonsEl.querySelector(".group");
     this._groupBtn.addEventListener("click", () => {
       this._group = !this._group;
@@ -546,13 +624,15 @@ class MapHistoryCard extends HTMLElement {
     this._buttonsEl.classList.toggle("dark", Boolean(this._dark));
     const icon = this._groupBtn.querySelector("ha-icon");
     icon.setAttribute("icon", this._group ? MDI_GROUP_ON : MDI_GROUP_OFF);
-    this._groupBtn.title = this._group ? "Overlappende markers groeperen" : "Markers los tonen";
+    const groupLabel = this._t(this._group ? "groupOn" : "groupOff");
+    this._groupBtn.title = groupLabel;
+    this._groupBtn.setAttribute("aria-label", groupLabel);
   }
 
   _buildRangeChips() {
     const wrap = this._root.querySelector(".range .chips");
     wrap.innerHTML = QUICK_RANGES.map(
-      (r) => '<button class="chip range-chip" data-h="' + r.h + '">' + r.label + "</button>"
+      (r) => '<button class="chip range-chip" data-h="' + r.h + '">' + this._rangeLabel(r.h) + "</button>"
     ).join("");
     wrap.addEventListener("click", (ev) => {
       const btn = ev.target.closest("button[data-h]");
@@ -716,11 +796,9 @@ class MapHistoryCard extends HTMLElement {
   _updateSummary() {
     if (!this._overviewEl) return;
     const total = this._candidateOrder ? this._candidateOrder.length : 0;
-    const range = this._rangeHours
-      ? (QUICK_RANGES.find((r) => r.h === this._rangeHours) || { label: this._rangeHours + "u" }).label
-      : "eigen periode";
+    const range = this._rangeHours ? this._rangeLabel(this._rangeHours) : this._t("customRange");
     const s = this._root.querySelector(".summary");
-    if (s) s.textContent = this._selected.size + " van " + total + " geselecteerd · " + range;
+    if (s) s.textContent = this._t("summary", { n: this._selected.size, total, range });
     const hint = this._root.querySelector(".range-head .hint");
     if (hint) hint.textContent = range;
   }
@@ -848,7 +926,7 @@ class MapHistoryCard extends HTMLElement {
         this._refreshHistory();
       });
     } catch (err) {
-      this._setStatus("Kaart laden mislukt: " + (err.message || err));
+      this._setStatus(this._t("mapFailed", { msg: err.message || err }));
     } finally {
       this._creating = false;
     }
@@ -1038,9 +1116,9 @@ class MapHistoryCard extends HTMLElement {
   }
 
   _prettyState(state) {
-    if (state === "home") return "Thuis";
-    if (state === "not_home") return "Onderweg";
-    if (state === "unavailable" || state === "unknown") return "Onbekend";
+    if (state === "home") return this._t("home");
+    if (state === "not_home") return this._t("notHome");
+    if (state === "unavailable" || state === "unknown") return this._t("unknown");
     return state;
   }
 
@@ -1143,7 +1221,7 @@ class MapHistoryCard extends HTMLElement {
     this._updateSummary();
 
     if (ids.length === 0) {
-      this._listEl.innerHTML = '<div class="empty">Geen ' + (this._tab === "person" ? "personen" : "apparaten") + " gevonden.</div>";
+      this._listEl.innerHTML = '<div class="empty">' + this._t(this._tab === "person" ? "noPeople" : "noDevices") + "</div>";
       return;
     }
     this._listEl.innerHTML = ids.map((eid) => {
@@ -1214,7 +1292,7 @@ class MapHistoryCard extends HTMLElement {
       el.className = "zone-circle";
       el.style.backgroundColor = color;
       el.style.color = contrastingContent(color);
-      el.title = this._labelFor(eid) + " · radius " + Math.round(metres) + " m";
+      el.title = this._t("zoneTip", { name: this._labelFor(eid), m: Math.round(metres) });
       if (a.icon) {
         const icon = document.createElement("ha-icon");
         icon.setAttribute("icon", a.icon);
@@ -1318,7 +1396,7 @@ class MapHistoryCard extends HTMLElement {
   }
 
   _bindMarkerTip(el, marker, item) {
-    const html = this._pointTooltip(item.label + " — nu", item.live, item.liveAttrs, { approx: item.approx, zone: item.zone });
+    const html = this._pointTooltip(this._t("nowTitle", { name: item.label }), item.live, item.liveAttrs, { approx: item.approx, zone: item.zone });
     el.addEventListener("mouseenter", () => this._showTip(item.ll, html));
     el.addEventListener("mouseleave", () => this._popup && this._popup.remove());
     el.addEventListener("click", (ev) => {
@@ -1335,23 +1413,23 @@ class MapHistoryCard extends HTMLElement {
   // Waypoint tooltip from whatever the recorder kept; every line is optional.
   _pointTooltip(title, rec, attrs, point) {
     const rows = [];
-    if (point && point.approx) rows.push("~ positie via zone" + (point.zone ? " " + point.zone : "") + " (geen GPS)");
+    if (point && point.approx) rows.push(point.zone ? this._t("approxZone", { zone: point.zone }) : this._t("approxNoZone"));
     const when = rec.last_updated || rec.last_changed || (rec.lu ? rec.lu * 1000 : null);
     if (when) {
       const d = new Date(when);
       if (!Number.isNaN(d.getTime())) {
-        rows.push(d.toLocaleDateString("nl-BE", { day: "2-digit", month: "2-digit" }) + " " +
-          d.toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
+        rows.push(d.toLocaleDateString(this._lang.locale, { day: "2-digit", month: "2-digit" }) + " " +
+          d.toLocaleTimeString(this._lang.locale, { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
       }
     }
     const state = rec.state !== undefined ? rec.state : rec.s;
-    if (state) rows.push("status: " + this._prettyState(state).toLowerCase());
-    if (typeof attrs.gps_accuracy === "number") rows.push("nauwkeurigheid: ±" + Math.round(attrs.gps_accuracy) + " m");
-    if (typeof attrs.speed === "number" && attrs.speed > 0) rows.push("snelheid: " + Math.round(attrs.speed * 3.6) + " km/u");
-    if (typeof attrs.altitude === "number") rows.push("hoogte: " + Math.round(attrs.altitude) + " m");
-    if (typeof attrs.course === "number" && attrs.course > 0) rows.push("richting: " + Math.round(attrs.course) + "°");
-    if (typeof attrs.battery_level === "number") rows.push("batterij: " + Math.round(attrs.battery_level) + "%");
-    if (attrs.source_type) rows.push("bron: " + attrs.source_type);
+    if (state) rows.push(this._t("tipStatus") + ": " + this._prettyState(state).toLowerCase());
+    if (typeof attrs.gps_accuracy === "number") rows.push(this._t("tipAccuracy") + ": ±" + Math.round(attrs.gps_accuracy) + " m");
+    if (typeof attrs.speed === "number" && attrs.speed > 0) rows.push(this._t("tipSpeed") + ": " + Math.round(attrs.speed * 3.6) + " " + this._t("speedUnit"));
+    if (typeof attrs.altitude === "number") rows.push(this._t("tipAltitude") + ": " + Math.round(attrs.altitude) + " m");
+    if (typeof attrs.course === "number" && attrs.course > 0) rows.push(this._t("tipCourse") + ": " + Math.round(attrs.course) + "°");
+    if (typeof attrs.battery_level === "number") rows.push(this._t("tipBattery") + ": " + Math.round(attrs.battery_level) + "%");
+    if (attrs.source_type) rows.push(this._t("tipSource") + ": " + attrs.source_type);
     if (typeof attrs.latitude === "number" && typeof attrs.longitude === "number") {
       rows.push(attrs.latitude.toFixed(5) + ", " + attrs.longitude.toFixed(5));
     }
@@ -1379,17 +1457,17 @@ class MapHistoryCard extends HTMLElement {
       this._geo.lines = []; this._geo.points = []; this._nowData = [];
       this._pushGeo();
       this._drawCurrentMarkers();
-      this._setStatus("Kies een of meerdere personen of apparaten.");
+      this._setStatus(this._t("pickSome"));
       fitTo(zoneBounds());
       return;
     }
 
     const startDate = this._startEl.value ? new Date(this._startEl.value) : null;
     const endDate = this._endEl.value ? new Date(this._endEl.value) : new Date();
-    if (!startDate || Number.isNaN(startDate.getTime())) { this._setStatus("Kies een geldige startdatum."); return; }
-    if (endDate.getTime() <= startDate.getTime()) { this._setStatus("Einddatum moet na de startdatum liggen."); return; }
+    if (!startDate || Number.isNaN(startDate.getTime())) { this._setStatus(this._t("pickStart")); return; }
+    if (endDate.getTime() <= startDate.getTime()) { this._setStatus(this._t("endAfterStart")); return; }
 
-    this._setStatus("Geschiedenis laden…");
+    this._setStatus(this._t("loading"));
     const requestId = (this._requestId = (this._requestId || 0) + 1);
 
     let result;
@@ -1407,7 +1485,7 @@ class MapHistoryCard extends HTMLElement {
       });
     } catch (err) {
       if (requestId !== this._requestId) return;
-      this._setStatus("Kon geschiedenis niet laden: " + (err.message || err));
+      this._setStatus(this._t("loadFailed", { msg: err.message || err }));
       return;
     }
     if (requestId !== this._requestId) return;
@@ -1450,7 +1528,7 @@ class MapHistoryCard extends HTMLElement {
         const first = pts[0];
         points.push({
           type: "Feature",
-          properties: { color, approx: false, start: true, tip: this._pointTooltip(label + " — start", first.rec, first.attrs, first) },
+          properties: { color, approx: false, start: true, tip: this._pointTooltip(this._t("startTitle", { name: label }), first.rec, first.attrs, first) },
           geometry: { type: "Point", coordinates: first.ll },
         });
         pts.forEach((p) => bounds.extend(p.ll));
@@ -1494,7 +1572,7 @@ class MapHistoryCard extends HTMLElement {
       fit = zoneBounds();
     }
     fitTo(fit);
-    this._setStatus(any ? "" : "Geen locatiegegevens gevonden voor deze periode.");
+    this._setStatus(any ? "" : this._t("noData"));
   }
 }
 
