@@ -25,6 +25,8 @@ jobs:
         with:
           node-version: 22
       - run: node --check map-history-card.js
+      - name: Translations are complete
+        run: node scripts/check-translations.mjs
   cdn:
     name: CDN assets exist
     runs-on: ubuntu-latest
