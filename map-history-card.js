@@ -1096,19 +1096,33 @@ class MapHistoryCard extends HTMLElement {
     });
     this._candidateOrder = candidates;
 
+    // Until a real roster exists (auto-entities first hands over a one-entry
+    // placeholder) there is nothing to judge a selection against: pruning now
+    // would wipe the saved selection and persist it empty.
     let defaultsJustApplied = false;
-    if (this._defaultsPending && candidates.length > 0) {
-      this._selected = new Set(this._defaultSelection(candidates));
-      this._defaultsPending = false;
-      defaultsJustApplied = true;
-      this._persist();
-      this._centerOnSelectionLive();
+    if (candidates.length > 0) {
+      let changed = false;
+      for (const sel of Array.from(this._selected)) {
+        if (!candidates.includes(sel)) { this._selected.delete(sel); changed = true; }
+      }
+      // Pruning emptied the selection (everything saved left the roster): fall
+      // back to the defaults. Only then -- a deliberate "geen" is also empty
+      // and must stay empty.
+      if (changed && this._selected.size === 0) this._defaultsPending = true;
+      if (this._defaultsPending) {
+        const defaults = this._defaultSelection(candidates);
+        // Stay pending when none of the defaults are in the roster yet, so a
+        // later, fuller roster still gets them.
+        if (defaults.length > 0) {
+          this._selected = new Set(defaults);
+          this._defaultsPending = false;
+          defaultsJustApplied = true;
+          changed = true;
+          this._centerOnSelectionLive();
+        }
+      }
+      if (changed) this._persist();
     }
-    let changed = false;
-    for (const sel of Array.from(this._selected)) {
-      if (!candidates.includes(sel)) { this._selected.delete(sel); changed = true; }
-    }
-    if (changed) this._persist();
 
     this._renderList();
     if (defaultsJustApplied) this._refreshHistory();
