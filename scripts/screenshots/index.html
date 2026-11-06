@@ -1,0 +1,57 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{--primary-color:#03a9f4;--primary-text-color:#212121;--secondary-text-color:#727272;--card-background-color:#fff;--divider-color:#e0e0e0;--text-primary-color:#fff;
+--ha-space-1:4px;--ha-space-2:8px;--ha-space-3:12px;--ha-space-7:28px;--ha-font-size-s:12px;--ha-font-size-m:14px;--ha-font-weight-medium:500;
+--ha-border-radius-sm:4px;--ha-border-radius-md:8px;--ha-border-radius-lg:12px;--ha-border-radius-xl:16px;--ha-border-radius-2xl:24px;--ha-border-radius-pill:9999px;
+--ha-box-shadow-s:0 1px 3px rgba(0,0,0,.2);--ha-box-shadow-m:0 2px 8px rgba(0,0,0,.25);--ha-color-fill-neutral-quiet-resting:rgba(0,0,0,.06);
+--ha-font-family-body:Roboto,system-ui,sans-serif;
+--color-1:#e6194b;--color-2:#3cb44b;--color-3:#4363d8;--color-4:#f58231;--color-5:#911eb4;--color-6:#46f0f0}
+html,body{margin:0;height:100%;background:#fafafa;font-family:Roboto,system-ui,sans-serif}
+#wrap{width:1100px;height:640px;margin:0}
+ha-card{display:block;background:var(--card-background-color);overflow:hidden;box-shadow:var(--ha-box-shadow-s)}
+ha-icon{display:inline-flex;width:var(--mdc-icon-size,24px);height:var(--mdc-icon-size,24px)}
+ha-icon svg{width:100%;height:100%;fill:currentColor}
+</style></head><body><div id="wrap"></div>
+<script>
+customElements.define("ha-card",class extends HTMLElement{constructor(){super();const r=this.attachShadow({mode:"open"});r.innerHTML='<style>:host{display:block;background:var(--card-background-color);color:var(--primary-text-color);box-shadow:var(--ha-box-shadow-s)}</style><slot></slot>'}});
+customElements.define("ha-icon",class extends HTMLElement{static get observedAttributes(){return["icon"]}
+ constructor(){super();this.attachShadow({mode:"open"}).innerHTML='<style>:host{display:inline-flex;width:var(--mdc-icon-size,24px);height:var(--mdc-icon-size,24px)}svg{width:100%;height:100%;fill:currentColor}</style><span style="display:contents"></span>'}
+ connectedCallback(){this.u()}attributeChangedCallback(){this.u()}
+ u(){const i=(this.getAttribute("icon")||"").replace("mdi:","");if(!i||i===this._i)return;this._i=i;
+  fetch("https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/"+i+".svg").then(r=>r.text()).then(t=>{if(this._i===i)this.shadowRoot.querySelector("span").innerHTML=t}).catch(()=>{})}});
+const av=(l,c)=>"data:image/svg+xml,"+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96"><rect width="96" height="96" fill="${c}"/><text x="48" y="64" font-size="48" font-family="sans-serif" fill="#fff" text-anchor="middle">${l}</text></svg>`);
+const now=Date.now(),H=3600e3;
+// fictional zones + devices (Central Park area, nothing real)
+const Z={home:[40.7794,-73.9632],work:[40.7527,-73.9772],gym:[40.7681,-73.9819]};
+const zone=(id,n,ll,icon)=>({entity_id:"zone."+id,state:"0",attributes:{friendly_name:n,latitude:ll[0],longitude:ll[1],radius:120,icon}});
+function rnd(s){return()=>{s=(s*16807)%2147483647;return s/2147483647}}
+function path(pts,n,seed,jit){const r=rnd(seed),out=[];for(let i=0;i<n;i++){const t=i/(n-1)*(pts.length-1),k=Math.min(Math.floor(t),pts.length-2),f=t-k;
+ out.push([pts[k][0]+(pts[k+1][0]-pts[k][0])*f+(r()-.5)*jit,pts[k][1]+(pts[k+1][1]-pts[k][1])*f+(r()-.5)*jit])}return out}
+const T={
+ "person.alex":{name:"Alex",c:"#4363d8",l:"A",pts:[Z.home,[40.7740,-73.9640],[40.7690,-73.9672],[40.7630,-73.9710],[40.7580,-73.9745],Z.work],n:46,seed:7,from:9,to:1.5,end:"Work"},
+ "person.sam":{name:"Sam",c:"#e6194b",l:"S",pts:[Z.home,[40.7765,-73.9700],[40.7715,-73.9760],[40.7690,-73.9790],Z.gym,[40.7712,-73.9810],[40.7760,-73.9740]],n:60,seed:11,from:11,to:.3,end:"not_home"},
+ "device_tracker.bike":{name:"City bike",c:"#3cb44b",l:"B",pts:[[40.7690,-73.9745],[40.7705,-73.9695],[40.7745,-73.9660],[40.7790,-73.9665],[40.7810,-73.9700],[40.7780,-73.9750],[40.7730,-73.9760]],n:40,seed:3,from:6,to:.5,end:"not_home"}};
+const states={};const hist={};
+for(const [id,z] of [["home","Home"],["work","Work"],["gym","Gym"]]){const e=zone(id,z,Z[id],{home:"mdi:home",work:"mdi:briefcase",gym:"mdi:dumbbell"}[id]);states[e.entity_id]=e}
+const reg=[{entity_id:"zone.work",id:"a",created_at:1},{entity_id:"zone.gym",id:"b",created_at:2}];let ci=3;
+for(const [id,t] of Object.entries(T)){const p=path(t.pts,t.n,t.seed,.0004);
+ hist[id]=[];const rt=pts=>pts.concat(pts.slice(0,-1).reverse());
+ for(const d of [2,1,0]){const sh=d===1?.0022:.0040;const base=rt(t.pts.map(([x,y])=>[x,y]));
+  const q=d===0?p:path(base.map(([x,y],k)=>[x+(k===0||k===base.length-1?0:(d===1?1:-1)*sh*(id==="person.alex"?1:-.6)),y+(k===0||k===base.length-1?0:(d===1?-1:1)*sh*.7)]),Math.round(t.n*1.6),t.seed+d*13,.0003);
+  const f=d===0?t.from:22,e=d===0?t.to:2;
+  hist[id].push(...q.map((ll,i)=>({state:"not_home",last_updated:now-d*24*H-(f-(f-e)*i/(q.length-1))*H,attributes:{latitude:ll[0],longitude:ll[1],gps_accuracy:8+Math.round((i*7)%12),battery_level:Math.max(8,78-Math.round(i/3)),source_type:"gps",friendly_name:t.name}})))}
+ const last=p[p.length-1],st=t.end==="Work"?"Work":"not_home";
+ states[id]={entity_id:id,state:st,attributes:{friendly_name:t.name,latitude:last[0],longitude:last[1],entity_picture:av(t.l,t.c),gps_accuracy:10,source_type:"gps"}};
+ if(t.end==="Work"){states[id].attributes.latitude=Z.work[0];states[id].attributes.longitude=Z.work[1]}
+ reg.push({entity_id:id,id:id,created_at:ci++})}
+const dark=location.search.includes("dark");
+const hass={states,config:{latitude:Z.home[0],longitude:Z.home[1]},language:"en",locale:{language:"en"},themes:{darkMode:dark},
+ callWS:async m=>{if(m.type==="map_tiles/access_token")return{token:"x"};if(m.type==="config/entity_registry/list")return reg;
+  if(m.type==="history/history_during_period"){const o={};const st=Date.parse(m.start_time);for(const e of m.entity_ids)o[e]=(hist[e]||[]).filter(r=>r.last_updated>=st);return o}return{}}};
+if(dark){document.documentElement.style.cssText+=";--card-background-color:#1c1c1c;--primary-text-color:#e1e1e1;--secondary-text-color:#9b9b9b;--divider-color:#333;--ha-color-fill-neutral-quiet-resting:rgba(255,255,255,.08)"}
+const s=document.createElement("script");s.src="/map-history-card.js";s.onload=()=>{
+ const c=document.createElement("map-history-card");
+ c.setConfig({type:"custom:map-history-card",entities:Object.keys(states),default_hours:12,height:640});
+ c.hass=hass;document.getElementById("wrap").appendChild(c);window.__ready=true};
+document.body.appendChild(s);
+</script></body></html>
