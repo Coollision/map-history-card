@@ -82,6 +82,7 @@ const STRINGS = {
     approxZone: "~ position from zone {zone} (no GPS)", approxNoZone: "~ position from zone (no GPS)",
     tipStatus: "status", tipAccuracy: "accuracy", tipSpeed: "speed", tipAltitude: "altitude",
     tipCourse: "heading", tipBattery: "battery", tipSource: "source", speedUnit: "km/h",
+    retry: "Tap to retry",
   },
   nl: {
     tabPeople: "Mensen", tabDevices: "Apparaten",
@@ -108,6 +109,7 @@ const STRINGS = {
     approxZone: "~ positie via zone {zone} (geen GPS)", approxNoZone: "~ positie via zone (geen GPS)",
     tipStatus: "status", tipAccuracy: "nauwkeurigheid", tipSpeed: "snelheid", tipAltitude: "hoogte",
     tipCourse: "richting", tipBattery: "batterij", tipSource: "bron", speedUnit: "km/u",
+    retry: "Tik om opnieuw te proberen",
   },
   de: {
     tabPeople: "Personen", tabDevices: "Geräte", all: "alle", none: "keine", default: "Standard", invert: "umkehren",
@@ -127,6 +129,7 @@ const STRINGS = {
     approxNoZone: "~ Position über Zone (kein GPS)", tipStatus: "Status", tipAccuracy: "Genauigkeit",
     tipSpeed: "Geschwindigkeit", tipAltitude: "Höhe", tipCourse: "Richtung", tipBattery: "Akku", tipSource: "Quelle",
     speedUnit: "km/h",
+    retry: "Tippen zum Wiederholen",
   },
   fr: {
     tabPeople: "Personnes", tabDevices: "Appareils", all: "tout", none: "aucun", default: "défaut",
@@ -149,6 +152,7 @@ const STRINGS = {
     approxNoZone: "~ position d’après la zone (pas de GPS)", tipStatus: "statut", tipAccuracy: "précision",
     tipSpeed: "vitesse", tipAltitude: "altitude", tipCourse: "cap", tipBattery: "batterie", tipSource: "source",
     speedUnit: "km/h",
+    retry: "Touchez pour réessayer",
   },
   es: {
     tabPeople: "Personas", tabDevices: "Dispositivos", all: "todo", none: "nada", default: "predeterminado",
@@ -169,6 +173,7 @@ const STRINGS = {
     approxNoZone: "~ posición según la zona (sin GPS)", tipStatus: "estado", tipAccuracy: "precisión",
     tipSpeed: "velocidad", tipAltitude: "altitud", tipCourse: "rumbo", tipBattery: "batería", tipSource: "fuente",
     speedUnit: "km/h",
+    retry: "Toca para reintentar",
   },
   it: {
     tabPeople: "Persone", tabDevices: "Dispositivi", all: "tutti", none: "nessuno", default: "predefinito",
@@ -189,6 +194,7 @@ const STRINGS = {
     approxNoZone: "~ posizione dedotta dalla zona (senza GPS)", tipStatus: "stato", tipAccuracy: "precisione",
     tipSpeed: "velocità", tipAltitude: "altitudine", tipCourse: "direzione", tipBattery: "batteria",
     tipSource: "fonte", speedUnit: "km/h",
+    retry: "Tocca per riprovare",
   },
   pt: {
     tabPeople: "Pessoas", tabDevices: "Dispositivos", all: "todos", none: "nenhum", default: "predefinido",
@@ -209,6 +215,7 @@ const STRINGS = {
     approxNoZone: "~ posição pela zona (sem GPS)", tipStatus: "estado", tipAccuracy: "precisão",
     tipSpeed: "velocidade", tipAltitude: "altitude", tipCourse: "direção", tipBattery: "bateria", tipSource: "origem",
     speedUnit: "km/h",
+    retry: "Toque para tentar novamente",
   },
   pl: {
     tabPeople: "Osoby", tabDevices: "Urządzenia", all: "wszystkie", none: "żadne", default: "domyślne",
@@ -226,6 +233,7 @@ const STRINGS = {
     startTitle: "{name} — początek", approxZone: "~ pozycja ze strefy {zone} (bez GPS)",
     approxNoZone: "~ pozycja ze strefy (bez GPS)", tipStatus: "stan", tipAccuracy: "dokładność", tipSpeed: "prędkość",
     tipAltitude: "wysokość", tipCourse: "kierunek", tipBattery: "bateria", tipSource: "źródło", speedUnit: "km/h",
+    retry: "Dotknij, aby ponowić",
   },
   ru: {
     tabPeople: "Люди", tabDevices: "Устройства", all: "все", none: "ничего", default: "по умолчанию",
@@ -243,6 +251,7 @@ const STRINGS = {
     startTitle: "{name} — начало", approxZone: "~ позиция по зоне {zone} (без GPS)",
     approxNoZone: "~ позиция по зоне (без GPS)", tipStatus: "статус", tipAccuracy: "точность", tipSpeed: "скорость",
     tipAltitude: "высота", tipCourse: "курс", tipBattery: "батарея", tipSource: "источник", speedUnit: "км/ч",
+    retry: "Нажмите, чтобы повторить",
   },
   zh: {
     tabPeople: "人员", tabDevices: "设备", all: "全选", none: "全不选", default: "默认", invert: "反选", period: "时间段", from: "从",
@@ -255,6 +264,7 @@ const STRINGS = {
     nowTitle: "{name} — 现在", startTitle: "{name} — 起点", approxZone: "~ 根据区域 {zone} 推算的位置（无 GPS）",
     approxNoZone: "~ 根据区域推算的位置（无 GPS）", tipStatus: "状态", tipAccuracy: "精度", tipSpeed: "速度", tipAltitude: "海拔",
     tipCourse: "方向", tipBattery: "电量", tipSource: "来源", speedUnit: "km/h",
+    retry: "点击重试",
   },
 };
 
@@ -420,6 +430,23 @@ const STYLES = `
   #buttons.dark button { color: #fff; }
   #buttons button:hover { background: rgba(127,127,127,.2); }
   #buttons button:focus-visible { outline: 2px solid var(--primary-color); }
+
+  /* Loading hint over the map; turns into a tap-to-retry pill when a load gives up */
+  #loading:not([hidden]) {
+    position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 2;
+    display: flex; align-items: center; gap: 8px; max-width: calc(100% - 120px); padding: 6px 12px;
+    border-radius: var(--ha-border-radius-pill, 999px); background: var(--card-background-color);
+    color: var(--secondary-text-color); font-size: var(--ha-font-size-s, 12px);
+    box-shadow: var(--ha-box-shadow-s, 0 1px 3px rgba(0,0,0,.2)); pointer-events: none;
+  }
+  #loading.retry { cursor: pointer; pointer-events: auto; }
+  #loading .txt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #loading .spin {
+    flex: none; width: 14px; height: 14px; box-sizing: border-box; border-radius: 50%;
+    border: 2px solid var(--divider-color); border-top-color: var(--primary-color);
+    animation: mhc-spin 800ms linear infinite;
+  }
+  @keyframes mhc-spin { to { transform: rotate(360deg); } }
 
   /* Markers: ha-entity-marker (floating) and the cluster bubble */
   .pin { display: flex; flex-direction: column; align-items: center; filter: var(--cluster-shadow); cursor: pointer; }
@@ -619,7 +646,7 @@ class MapHistoryCard extends HTMLElement {
     // auto-entities re-calls setConfig whenever its roster changes: keep the DOM and map.
     if (this._built) {
       this._refreshEntityList();
-      this._refreshHistory();
+      this._requestRefresh();
     }
   }
 
@@ -634,9 +661,18 @@ class MapHistoryCard extends HTMLElement {
     }
     if (wasDark !== undefined && wasDark !== this._dark) this._applyTheme();
     this._refreshEntityList();
+    // A refresh that came too early, or a failed one once the connection is back.
+    // Only on the reconnect edge: a failure while connected waits for a tap, it
+    // must not re-run on every state update.
+    const connected = hass.connected !== false;
+    const reconnected = connected && this._wasConnected === false;
+    this._wasConnected = connected;
+    if (this._pendingRefresh || (this._lastFailed && reconnected)) this._requestRefresh();
   }
 
   connectedCallback() {
+    window.clearTimeout(this._teardownTimer);
+    this._teardownTimer = undefined;
     if (this._onWindowResize) window.addEventListener("resize", this._onWindowResize);
     if (this._map) {
       this._observeSize();
@@ -645,6 +681,9 @@ class MapHistoryCard extends HTMLElement {
         this._map.resize();
         this._refit();
       }, 0);
+    } else if (this._maplibre) {
+      // Torn down while detached (see disconnectedCallback): build it again.
+      this._initMapWhenSized();
     }
   }
 
@@ -653,6 +692,28 @@ class MapHistoryCard extends HTMLElement {
     if (this._onWindowResize) window.removeEventListener("resize", this._onWindowResize);
     window.clearTimeout(this._resizeTimer);
     window.clearTimeout(this._heightTimer);
+    // Detached for a while (auto-entities re-rendering, a background tab): free
+    // the WebGL context. connectedCallback cancels this if the card comes back.
+    window.clearTimeout(this._teardownTimer);
+    this._teardownTimer = window.setTimeout(() => {
+      this._teardownTimer = undefined;
+      this._teardownMap();
+    }, 10000);
+  }
+
+  _teardownMap() {
+    if (!this._map) return;
+    this._map.remove();
+    this._map = undefined;
+    this._mapLoaded = false;
+    this._layersReady = false;
+    this._popup = undefined;
+    this._layerEventsBound = false;
+    this._markers = [];
+    this._zoneMarkers = [];
+    window.clearInterval(this._tokenTimer);
+    this._tokenTimer = undefined;
+    this._mapEl.classList.remove("drawn");
   }
 
   getCardSize() { return 8; }
@@ -681,6 +742,7 @@ class MapHistoryCard extends HTMLElement {
       "<ha-card>" +
       '  <div id="map"></div>' +
       '  <div id="buttons"></div>' +
+      '  <div id="loading" hidden></div>' +
       '  <div id="overview">' +
       '    <div id="handle" role="button" tabindex="0" aria-label="' + this._t("handleLabel") + '"></div>' +
       '    <div class="tabs" role="tablist" style="--tab-count:2;--tab-index:0">' +
@@ -722,6 +784,17 @@ class MapHistoryCard extends HTMLElement {
     this._startEl = $(".start");
     this._endEl = $(".end");
     this._buttonsEl = $("#buttons");
+    this._loadingEl = $("#loading");
+    // Tap (or Enter) on the pill only does something in the retry state.
+    const retryTap = (ev) => {
+      if (ev.type === "keydown" && ev.key !== "Enter" && ev.key !== " ") return;
+      if (!this._loadingEl.classList.contains("retry")) return;
+      ev.preventDefault();
+      this._lastFailed = false;
+      this._requestRefresh();
+    };
+    this._loadingEl.addEventListener("click", retryTap);
+    this._loadingEl.addEventListener("keydown", retryTap);
     this._startEl.value = this._start;
     this._endEl.value = this._end;
 
@@ -789,7 +862,7 @@ class MapHistoryCard extends HTMLElement {
       this._startEl.value = this._start = toLocalInputValue(new Date(now.getTime() - this._rangeHours * 3600 * 1000));
       this._endEl.value = this._end = toLocalInputValue(now);
       this._syncRangeChips();
-      this._refreshHistory();
+      this._requestRefresh();
     });
     this._syncRangeChips();
   }
@@ -818,11 +891,11 @@ class MapHistoryCard extends HTMLElement {
       this._end = this._endEl.value;
       this._rangeHours = undefined;
       this._syncRangeChips();
-      this._refreshHistory();
+      this._requestRefresh();
     };
     this._startEl.addEventListener("change", onDates);
     this._endEl.addEventListener("change", onDates);
-    $(".refresh").addEventListener("click", () => this._refreshHistory());
+    $(".refresh").addEventListener("click", () => this._requestRefresh());
     this._root.querySelector(".actions").addEventListener("click", (ev) => {
       const btn = ev.target.closest("button[data-act]");
       if (!btn) return;
@@ -847,7 +920,7 @@ class MapHistoryCard extends HTMLElement {
       row.setAttribute("aria-checked", String(this._selected.has(eid)));
       this._persist();
       this._centerOnSelectionLive();
-      this._refreshHistory();
+      this._requestRefresh();
     });
 
     // Phone sheet: tap or flick the handle to peek/expand.
@@ -1068,10 +1141,11 @@ class MapHistoryCard extends HTMLElement {
       this._map.on("zoomend", () => { this._drawCurrentMarkers(); this._syncZoneMarkers(); });
       this._map.once("load", () => {
         this._mapEl.classList.add("drawn");
+        this._mapLoaded = true;
         this._onOverviewResized();
         this._observeSize();
         this._centerOnSelectionLive();
-        this._refreshHistory();
+        this._requestRefresh();
       });
     } catch (err) {
       this._setStatus(this._t("mapFailed", { msg: err.message || err }));
@@ -1089,7 +1163,11 @@ class MapHistoryCard extends HTMLElement {
     this._applyThemeClass();
     if (!this._map) return;
     try {
-      this._map.setStyle(await this._loadStyle());
+      const style = await this._loadStyle();
+      // diff:false replaces every source and layer (a diff would keep ours
+      // without firing style.load), so the style.load handler re-adds them.
+      this._layersReady = false;
+      this._map.setStyle(style, { diff: false });
     } catch (e) {
       // keep the current style
     }
@@ -1141,18 +1219,20 @@ class MapHistoryCard extends HTMLElement {
       });
     }
     this._pushGeo();
+    this._layersReady = true;
+    if (this._pendingRefresh || this._lastFailed) this._requestRefresh();
   }
 
+  // Not gated on isStyleLoaded(): that stays false while tiles load, which used
+  // to drop the data for good. Missing sources mean the data is pushed later.
   _pushGeo() {
-    if (!this._map || !this._map.isStyleLoaded()) return;
+    if (!this._map) return;
     const fc = (features) => ({ type: "FeatureCollection", features });
-    const set = (id, features) => {
-      const src = this._map.getSource("mhc-" + id);
-      if (src) src.setData(fc(features));
-    };
-    set("zones", this._geo.zones);
-    set("lines", this._geo.lines);
-    set("points", this._geo.points);
+    const ids = ["zones", "lines", "points"];
+    const srcs = ids.map((id) => this._map.getSource("mhc-" + id));
+    if (srcs.some((src) => !src)) { this._geoDirty = true; return; }
+    ids.forEach((id, i) => srcs[i].setData(fc(this._geo[id])));
+    this._geoDirty = false;
   }
 
   _cssVar(name) {
@@ -1207,6 +1287,31 @@ class MapHistoryCard extends HTMLElement {
     if (this._statusEl) this._statusEl.textContent = text || "";
   }
 
+  // Floating pill over the map: a spinner while a load is (re)trying.
+  _showLoading(on, attempt) {
+    const el = this._loadingEl;
+    if (!el) return;
+    el.classList.remove("retry");
+    el.removeAttribute("role");
+    el.removeAttribute("tabindex");
+    el.hidden = !on;
+    if (!on) { el.textContent = ""; return; }
+    el.innerHTML = '<span class="spin"></span><span class="txt"></span>';
+    el.querySelector(".txt").textContent = this._t("loading") + (attempt > 1 ? " (" + attempt + ")" : "");
+  }
+
+  // The same pill, as a tap target, once the load has given up.
+  _showRetry(msg) {
+    const el = this._loadingEl;
+    if (!el) return;
+    el.innerHTML = '<span class="txt"></span>';
+    el.querySelector(".txt").textContent = this._t("loadFailed", { msg }) + " · " + this._t("retry");
+    el.classList.add("retry");
+    el.setAttribute("role", "button");
+    el.tabIndex = 0;
+    el.hidden = false;
+  }
+
   // ---- selection & roster -----------------------------------------------
 
   _persist() {
@@ -1225,7 +1330,7 @@ class MapHistoryCard extends HTMLElement {
     this._renderList();
     this._persist();
     this._centerOnSelectionLive();
-    this._refreshHistory();
+    this._requestRefresh();
   }
 
   _normalizedEntityIds() {
@@ -1287,7 +1392,7 @@ class MapHistoryCard extends HTMLElement {
         [zones, people].forEach((seq) => seq.forEach((e, i) => { index[e.entity_id] = i; }));
         this._colorIndex = index;
         this._renderList();
-        this._refreshHistory();
+        this._requestRefresh();
       } catch (e) {
         this._colorIndex = {};
       }
@@ -1330,10 +1435,13 @@ class MapHistoryCard extends HTMLElement {
     if (candidates.length > 0) {
       let changed = false;
       // Only prune against a roster that looks real: a one-entry placeholder
-      // must not wipe the saved selection (it would be persisted empty).
+      // must not wipe the saved selection (it would be persisted empty), and
+      // neither may an empty hass.states (not loaded yet: every entity looks gone).
       // Entities that no longer exist at all are always dropped.
-      for (const sel of Array.from(this._selected)) {
-        const gone = !this._hass.states[sel];
+      const states = this._hass.states || {};
+      const haveStates = Object.keys(states).length > 0;
+      for (const sel of haveStates ? Array.from(this._selected) : []) {
+        const gone = !states[sel];
         if (gone || (candidates.length > 1 && !candidates.includes(sel))) { this._selected.delete(sel); changed = true; }
       }
       // Pruning emptied the selection (everything saved left the roster): fall
@@ -1356,7 +1464,7 @@ class MapHistoryCard extends HTMLElement {
     }
 
     this._renderList();
-    if (defaultsJustApplied) this._refreshHistory();
+    if (defaultsJustApplied) this._requestRefresh();
   }
 
   // Rebuilds only when something visible changed, so the scroll position and
@@ -1591,7 +1699,101 @@ class MapHistoryCard extends HTMLElement {
 
   // ---- history -----------------------------------------------------------
 
+  // Everything a draw needs: the map, its load, the layers, a real roster.
+  _isReady() {
+    return Boolean(this._map && this._mapLoaded && this._layersReady && this._hass &&
+      Object.keys(this._hass.states || {}).length > 0 && this._candidateOrder !== undefined);
+  }
+
+  // Asks for a history refresh. Before the map is ready the request is kept
+  // (pending) and run once it is; bursts collapse into one run.
+  _requestRefresh() {
+    this._pendingRefresh = true;
+    if (!this._isReady()) return;
+    window.clearTimeout(this._refreshTimer);
+    this._refreshTimer = window.setTimeout(() => {
+      this._refreshTimer = undefined;
+      this._pendingRefresh = false;
+      this._refreshHistory();
+    }, 50);
+  }
+
+  // history_during_period can fail or come back empty while the connection is
+  // flapping. Retry with backoff; the last attempt's outcome is used as is.
+  async _fetchHistory(params, requestId) {
+    const delays = this._retryDelays || [1000, 2000, 4000];
+    for (let attempt = 0; ; attempt++) {
+      if (attempt > 0) {
+        if (requestId !== this._requestId) return null;
+        this._showLoading(true, attempt + 1);
+        await new Promise((r) => window.setTimeout(r, delays[attempt - 1]));
+        if (requestId !== this._requestId) return null;
+      }
+      const last = attempt >= delays.length;
+      let result;
+      try {
+        result = await this._hass.callWS(params);
+      } catch (err) {
+        if (last) throw err;
+        continue;
+      }
+      if (last || !this._historyMissing(result, params.entity_ids)) return result;
+    }
+  }
+
+  // Nothing back for any selected entity, while HA already knows a live
+  // position for one of them: the response was lost, not the history empty.
+  _historyMissing(result, selected) {
+    if (this._hass.connected === false) return false;
+    if (selected.some((eid) => result && result[eid] && result[eid].length)) return false;
+    return selected.some((eid) => {
+      const a = this._hass.states[eid] && this._hass.states[eid].attributes;
+      return Boolean(a && typeof a.latitude === "number" && typeof a.longitude === "number");
+    });
+  }
+
+  // Which mhc-* sources are missing, or hold other than this._geo says.
+  async _geoMismatch() {
+    let missing = false;
+    let stale = false;
+    for (const id of ["zones", "lines", "points"]) {
+      const src = this._map.getSource("mhc-" + id);
+      if (!src) { missing = true; continue; }
+      try {
+        const data = await src.getData();
+        if (((data && data.features) || []).length !== this._geo[id].length) stale = true;
+      } catch (e) {
+        stale = true;
+      }
+    }
+    return { missing, stale };
+  }
+
+  // After a draw, check the sources really hold this._geo (a style swap or a
+  // lost setData leaves them empty). Repairs once, then gives up quietly.
+  async _verifyDraw(requestId) {
+    await new Promise((resolve) => {
+      const timer = window.setTimeout(resolve, 1500);
+      this._map.once("idle", () => { window.clearTimeout(timer); resolve(); });
+    });
+    if (requestId !== this._requestId || !this._map) return;
+    let state = await this._geoMismatch();
+    if (!state.missing && !state.stale) { this._verifyRetried = false; return; }
+    this._pushGeo();
+    state = await this._geoMismatch();
+    if (!state.missing && !state.stale) { this._verifyRetried = false; return; }
+    if (state.missing) { this._layersReady = false; this._installLayers(); }
+    if (!this._verifyRetried) {
+      this._verifyRetried = true;
+      this._requestRefresh();
+    }
+  }
+
   async _refreshHistory() {
+    // Bumped before any early return, so an older request still in flight can
+    // never land on top of a newer selection (or an empty one).
+    const requestId = (this._requestId = (this._requestId || 0) + 1);
+    this._showLoading(false);
     if (!this._map || !this._hass || !this._maplibre) return;
     const zones = this._drawZones();
     const selected = Array.from(this._selected);
@@ -1621,27 +1823,31 @@ class MapHistoryCard extends HTMLElement {
     if (endDate.getTime() <= startDate.getTime()) { this._setStatus(this._t("endAfterStart")); return; }
 
     this._setStatus(this._t("loading"));
-    const requestId = (this._requestId = (this._requestId || 0) + 1);
 
+    const params = {
+      type: "history/history_during_period",
+      start_time: startDate.toISOString(),
+      end_time: endDate.toISOString(),
+      entity_ids: selected,
+      minimal_response: false,
+      no_attributes: false,
+      // Default (true) drops every row whose state string is unchanged, which is
+      // nearly every GPS update of a tracker sitting in "not_home".
+      significant_changes_only: false,
+    };
     let result;
     try {
-      result = await this._hass.callWS({
-        type: "history/history_during_period",
-        start_time: startDate.toISOString(),
-        end_time: endDate.toISOString(),
-        entity_ids: selected,
-        minimal_response: false,
-        no_attributes: false,
-        // Default (true) drops every row whose state string is unchanged, which is
-        // nearly every GPS update of a tracker sitting in "not_home".
-        significant_changes_only: false,
-      });
+      result = await this._fetchHistory(params, requestId);
     } catch (err) {
       if (requestId !== this._requestId) return;
+      this._lastFailed = true;
       this._setStatus(this._t("loadFailed", { msg: err.message || err }));
+      this._showRetry(err.message || err);
       return;
     }
-    if (requestId !== this._requestId) return;
+    if (requestId !== this._requestId || result === null) return;
+    this._lastFailed = false;
+    this._showLoading(false);
 
     const ml = this._maplibre;
     const bounds = new ml.LngLatBounds();
@@ -1726,6 +1932,7 @@ class MapHistoryCard extends HTMLElement {
     }
     fitTo(fit);
     this._setStatus(any ? "" : this._t("noData"));
+    this._verifyDraw(requestId);
   }
 }
 

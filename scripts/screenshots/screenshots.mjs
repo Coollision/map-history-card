@@ -30,6 +30,7 @@ const server = http.createServer(async (req, res) => {
   } catch (e) { res.statusCode = 500; res.end(String(e)); }
 });
 await new Promise((r) => server.listen(0, r));
+let errors = 0;
 const base = "http://localhost:" + server.address().port + "/";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -50,7 +51,12 @@ const drawn = async (p) => {
 async function open(dark) {
   const p = await browser.newPage();
   await p.setViewport({ width: 1100, height: 640, deviceScaleFactor: 2 });
-  p.on("pageerror", (e) => console.log("pageerror:", String(e).slice(0, 200)));
+  p.on("pageerror", (e) => { errors++; console.log("pageerror:", String(e).slice(0, 200)); });
+  // Failed requests (404, blocked CDN) log as console errors; the local MapLibre 404 is expected.
+  p.on("console", (m) => {
+    if (m.type() !== "error" || /maplibre\/maplibre-gl\.mjs|status of 404/.test(m.text() + m.location().url)) return;
+    errors++; console.log("console.error:", m.text().slice(0, 200));
+  });
   await p.goto(base + (dark ? "?dark" : ""));
   await drawn(p);
   return p;
@@ -90,3 +96,4 @@ await range(p, "24h"); await shot(p, "devices-light"); await p.close();
 await browser.close();
 server.close();
 console.log("wrote screenshots to", outDir);
+if (errors) { console.log(errors + " page error(s)"); process.exitCode = 1; }
