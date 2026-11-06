@@ -35,7 +35,7 @@
 // loaded with import(): the vendored copy next to this card first (same origin,
 // so the worker resolves next to the module), the jsDelivr copy as fallback.
 const MAPLIBRE_VERSION = "6.16.0";
-const CARD_VERSION = "0.2.0"; // x-release-please-version
+const CARD_VERSION = "0.3.0"; // x-release-please-version
 const MAPLIBRE_LOCAL = "/local/community/map-history-card/maplibre/";
 const MAPLIBRE_CDN = "https://cdn.jsdelivr.net/npm/maplibre-gl@" + MAPLIBRE_VERSION + "/dist/";
 
