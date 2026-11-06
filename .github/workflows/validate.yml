@@ -2,10 +2,12 @@ name: Validate
 
 on:
   push:
+    branches-ignore: [main] # main is validated by release.yml, before it can release
   pull_request:
   schedule:
     - cron: "0 6 * * 1"
   workflow_dispatch:
+  workflow_call:
 
 jobs:
   hacs:
