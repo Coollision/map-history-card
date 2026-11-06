@@ -1,0 +1,7 @@
+{
+  "name": "map-history-card-screenshots",
+  "private": true,
+  "type": "module",
+  "description": "Renders the README screenshots from sample data",
+  "dependencies": { "puppeteer-core": "23.11.1" }
+}
