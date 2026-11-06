@@ -31,14 +31,13 @@
 //   height: 480               # optional, px (else fills the view)
 //   max_points: 300           # optional, hoverable points per trail
 
-// HA ships 6.x, but 6.x is ESM-only with a separate worker file (no single-file
-// build that a custom card can load cross-origin). 5.24.0 is the last line with
-// a self-contained UMD + inline worker; HA's light/dark style JSON validates
-// against its style spec.
-const MAPLIBRE_VERSION = "5.24.0";
+// MapLibre 6.x (what HA ships) is ESM-only with a separate worker file, so it is
+// loaded with import(): the vendored copy next to this card first (same origin,
+// so the worker resolves next to the module), the jsDelivr copy as fallback.
+const MAPLIBRE_VERSION = "6.16.0";
 const CARD_VERSION = "0.2.0"; // x-release-please-version
-const MAPLIBRE_CSS = "https://cdn.jsdelivr.net/npm/maplibre-gl@" + MAPLIBRE_VERSION + "/dist/maplibre-gl.css";
-const MAPLIBRE_JS = "https://cdn.jsdelivr.net/npm/maplibre-gl@" + MAPLIBRE_VERSION + "/dist/maplibre-gl.js";
+const MAPLIBRE_LOCAL = "/local/community/map-history-card/maplibre/";
+const MAPLIBRE_CDN = "https://cdn.jsdelivr.net/npm/maplibre-gl@" + MAPLIBRE_VERSION + "/dist/";
 
 // HA's map proxy (homeassistant/components/map_tiles) and the styles the frontend ships.
 const TILES_PATH = "/api/map_tiles";
@@ -275,18 +274,17 @@ const MDI_GROUP_ON = "mdi:google-circles-communities";
 const MDI_GROUP_OFF = "mdi:dots-hexagon";
 
 let maplibrePromise;
+let maplibreBase = MAPLIBRE_LOCAL; // where the stylesheet lives: next to whichever copy loaded
 function loadMapLibre() {
   if (window.maplibregl) return Promise.resolve(window.maplibregl);
   if (!maplibrePromise) {
-    maplibrePromise = new Promise((resolve, reject) => {
-      const script = document.createElement("script");
-      script.src = MAPLIBRE_JS;
-      script.onload = () => resolve(window.maplibregl);
-      script.onerror = () => {
-        maplibrePromise = undefined;
-        reject(new Error("maplibre-load-failed"));
-      };
-      document.head.appendChild(script);
+    const attempt = (base) => import(base + "maplibre-gl.mjs").then((mod) => {
+      maplibreBase = base;
+      return mod.Map ? mod : mod.default;
+    });
+    maplibrePromise = attempt(MAPLIBRE_LOCAL).catch(() => attempt(MAPLIBRE_CDN)).catch(() => {
+      maplibrePromise = undefined;
+      throw new Error("maplibre-load-failed");
     });
   }
   return maplibrePromise;
@@ -679,7 +677,7 @@ class MapHistoryCard extends HTMLElement {
 
     this._root.innerHTML =
       "<style>" + STYLES + "</style>" +
-      '<link rel="stylesheet" href="' + MAPLIBRE_CSS + '">' +
+      '<link rel="stylesheet" data-maplibre-css>' +
       "<ha-card>" +
       '  <div id="map"></div>' +
       '  <div id="buttons"></div>' +
@@ -746,6 +744,7 @@ class MapHistoryCard extends HTMLElement {
     }
     try {
       this._maplibre = await loadMapLibre();
+      this._root.querySelector("link[data-maplibre-css]").href = maplibreBase + "maplibre-gl.css";
     } catch (err) {
       this._setStatus(this._t("maplibreFailed"));
       return;
@@ -844,6 +843,7 @@ class MapHistoryCard extends HTMLElement {
       const eid = row.dataset.entity;
       if (this._selected.has(eid)) this._selected.delete(eid);
       else this._selected.add(eid);
+      this._defaultsPending = false;
       row.setAttribute("aria-checked", String(this._selected.has(eid)));
       this._persist();
       this._centerOnSelectionLive();
@@ -1221,6 +1221,7 @@ class MapHistoryCard extends HTMLElement {
 
   _applySelection(entityIds) {
     this._selected = new Set(entityIds);
+    this._defaultsPending = false;
     this._renderList();
     this._persist();
     this._centerOnSelectionLive();
@@ -1328,8 +1329,12 @@ class MapHistoryCard extends HTMLElement {
     let defaultsJustApplied = false;
     if (candidates.length > 0) {
       let changed = false;
+      // Only prune against a roster that looks real: a one-entry placeholder
+      // must not wipe the saved selection (it would be persisted empty).
+      // Entities that no longer exist at all are always dropped.
       for (const sel of Array.from(this._selected)) {
-        if (!candidates.includes(sel)) { this._selected.delete(sel); changed = true; }
+        const gone = !this._hass.states[sel];
+        if (gone || (candidates.length > 1 && !candidates.includes(sel))) { this._selected.delete(sel); changed = true; }
       }
       // Pruning emptied the selection (everything saved left the roster): fall
       // back to the defaults. Only then -- a deliberate "geen" is also empty
@@ -1337,11 +1342,11 @@ class MapHistoryCard extends HTMLElement {
       if (changed && this._selected.size === 0) this._defaultsPending = true;
       if (this._defaultsPending) {
         const defaults = this._defaultSelection(candidates);
-        // Stay pending when none of the defaults are in the roster yet, so a
-        // later, fuller roster still gets them.
-        if (defaults.length > 0) {
+        // Stay pending (until the user touches the selection) so a later,
+        // fuller roster still adds the rest of the defaults.
+        const same = defaults.length === this._selected.size && defaults.every((d) => this._selected.has(d));
+        if (defaults.length > 0 && !same) {
           this._selected = new Set(defaults);
-          this._defaultsPending = false;
           defaultsJustApplied = true;
           changed = true;
           this._centerOnSelectionLive();

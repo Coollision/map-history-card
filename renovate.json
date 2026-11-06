@@ -5,7 +5,7 @@
   "customManagers": [
     {
       "customType": "regex",
-      "description": "MapLibre GL JS version loaded from jsDelivr",
+      "description": "MapLibre GL JS version loaded (import) from jsDelivr",
       "managerFilePatterns": ["/^map-history-card\\.js$/"],
       "matchStrings": ["const MAPLIBRE_VERSION = \"(?<currentValue>[^\"]+)\";"],
       "datasourceTemplate": "npm",
@@ -15,7 +15,6 @@
   "packageRules": [
     {
       "matchPackageNames": ["maplibre-gl"],
-      "allowedVersions": "<6",
       "commitMessagePrefix": "fix(deps):",
       "automerge": false
     }

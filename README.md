@@ -128,13 +128,13 @@ Like Home Assistant's map, every entity gets a colour from the theme's `--color-
 
 ## How it works
 
-1. The card loads [MapLibre GL JS](https://maplibre.org) 5.24 from jsDelivr.
+1. The card loads [MapLibre GL JS](https://maplibre.org) 6.x (the line Home Assistant ships) from jsDelivr, using `import()`. If a copy sits in a `maplibre/` folder next to the card, that is used first (see Troubleshooting).
 2. It fetches Home Assistant's own style (`/static/map/light.json` or `dark.json`, picked from your theme) and asks the websocket for a tile token (`map_tiles/access_token`), refreshed every 20 minutes. Tiles are requested from your instance (`/api/map_tiles`) with that token.
 3. History is fetched with `history/history_during_period` (`significant_changes_only: false`, otherwise trackers that stay in `not_home` lose nearly every GPS update) and drawn as GeoJSON layers.
 
 ## Troubleshooting
 
-- **"MapLibre could not be loaded".** The browser could not reach `cdn.jsdelivr.net` (ad blocker, DNS filter, offline). Allow that host, or tell me and I will look at self-hosting the library.
+- **"MapLibre could not be loaded".** The browser could not reach `cdn.jsdelivr.net` (ad blocker, DNS filter, offline). Allow that host, or self-host: download `maplibre-gl.mjs`, `maplibre-gl-worker.mjs` and `maplibre-gl.css` of the version in `MAPLIBRE_VERSION` from [jsDelivr](https://cdn.jsdelivr.net/npm/maplibre-gl/dist/) into a `maplibre/` folder next to `map-history-card.js` (served as `/local/community/map-history-card/maplibre/`). The card tries that folder first.
 - **Blank grey map.** Tiles are being refused, usually because the tile token is missing. Check you run Home Assistant 2026.10+, then look at the browser console and network tab for 403 responses on `/api/map_tiles/...`.
 - **"This browser does not support WebGL2".** Your browser or device cannot do WebGL2. Home Assistant's own map falls back to a raster map there; this card does not.
 - **Card looks stale after an update.** Hard-refresh, and bump the `?v=` on a manual resource URL.
@@ -160,13 +160,13 @@ The English and Dutch texts were written by the author; the other eight are mach
 
 ## Updates and releases
 
-Versions follow [semantic versioning](https://semver.org) and are produced automatically from [conventional commits](https://www.conventionalcommits.org) (`feat:` → minor, `fix:` → patch, `feat!:` → major) by [release-please](https://github.com/googleapis/release-please). Each release attaches `map-history-card.js`, which HACS downloads, so HACS shows a normal update when a new version ships. The MapLibre version the card loads is kept current by Renovate within the 5.x line, and the GitHub Actions by Dependabot. Changes are listed in [CHANGELOG.md](CHANGELOG.md) and the [releases page](https://github.com/Coollision/map-history-card/releases).
+Versions follow [semantic versioning](https://semver.org) and are produced automatically from [conventional commits](https://www.conventionalcommits.org) (`feat:` → minor, `fix:` → patch, `feat!:` → major) by [release-please](https://github.com/googleapis/release-please). Each release attaches `map-history-card.js`, which HACS downloads, so HACS shows a normal update when a new version ships. The MapLibre version the card loads is kept current by Renovate, and the GitHub Actions by Dependabot. Changes are listed in [CHANGELOG.md](CHANGELOG.md) and the [releases page](https://github.com/Coollision/map-history-card/releases).
 
 ## Known limitations
 
 - No visual card editor yet; configure in YAML.
 - No raster fallback for devices without WebGL2.
-- MapLibre 5.24 is used instead of the 6.x that Home Assistant ships, because 6.x has no single-file build that a custom card can load from a CDN.
+- MapLibre 6.x is ESM-only with a separate worker file, so the card loads it with `import()` instead of a `<script>` tag. The worker is fetched next to the module (and wrapped in a blob when cross-origin).
 
 ## Credits and licence
 
