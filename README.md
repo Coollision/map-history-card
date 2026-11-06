@@ -10,6 +10,16 @@ Home Assistant's built-in map card shows where things are now, and its new overv
 
 > **Unofficial.** This is a community project. It is not affiliated with, endorsed by, or sponsored by Home Assistant, Nabu Casa or the Open Home Foundation. See [Credits and licence](#credits-and-licence).
 
+## Screenshots
+
+Sample data only (made-up people, places and trails).
+
+| Overview panel and current positions | Three days of history, dark theme |
+|---|---|
+| ![People tab with current positions and the last 12 hours of trails](https://raw.githubusercontent.com/Coollision/map-history-card/main/docs/images/people-light.png) | ![Three days of trails in the dark theme, with a point tooltip](https://raw.githubusercontent.com/Coollision/map-history-card/main/docs/images/history-dark.png) |
+| **Devices tab** | **Hover a point for details** |
+| ![Devices tab with a tracker trail and zone circles](https://raw.githubusercontent.com/Coollision/map-history-card/main/docs/images/devices-light.png) | ![Point tooltip with time, state, accuracy and battery](https://raw.githubusercontent.com/Coollision/map-history-card/main/docs/images/history-light.png) |
+
 ## Features
 
 - **Trails over a custom range.** Pick start and end, or use the 3h / 12h / 24h / 3d / 7d quick ranges. Every entity gets its own coloured trail. Hover or tap a point for time, state, accuracy, speed, altitude, bearing, battery and coordinates, wherever the tracker reports them.
