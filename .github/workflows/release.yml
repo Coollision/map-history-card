@@ -12,7 +12,12 @@ permissions:
   pull-requests: write
 
 jobs:
+  # Nothing is tagged or published unless every validation job passed on this commit.
+  validate:
+    uses: ./.github/workflows/validate.yml
+
   release-please:
+    needs: validate
     runs-on: ubuntu-latest
     outputs:
       release_created: ${{ steps.rp.outputs.release_created }}
