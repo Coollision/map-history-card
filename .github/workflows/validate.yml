@@ -45,3 +45,4 @@ jobs:
             [ -s "$f" ] || { echo "missing $f"; exit 1; }
           done
           if grep -En "https?://(cdn\.jsdelivr|unpkg)" dist/map-history-card.js; then echo "CDN URL in card"; exit 1; fi
+          if grep -rEn "(from|import\\()[ ]*[\"']https?://" dist; then echo "remote import in bundle"; exit 1; fi

@@ -36,7 +36,7 @@ Sample data only (made-up people, places and trails).
 |---|---|
 | Home Assistant | **2026.10 or newer.** The card uses the vector-map tile proxy and styles added in that release. |
 | Browser | WebGL2 (any current desktop or mobile browser). Without it the card shows a message instead of a map. |
-| Network | The browser must reach `cdn.jsdelivr.net` once to load the MapLibre library. Map tiles are fetched through **your own** Home Assistant instance (the card never talks to anyone else's), not from the internet directly. |
+| Network | Nothing is loaded from the internet by the card itself: MapLibre ships with it. Map tiles are fetched through **your own** Home Assistant instance (the card never talks to anyone else's), not from the internet directly. |
 | Recorder | Location history comes from the recorder, so entities need to be recorded (the default). |
 
 ## Installation
@@ -144,7 +144,7 @@ Like Home Assistant's map, every entity gets a colour from the theme's `--color-
 
 ## Troubleshooting
 
-- **"MapLibre could not be loaded".** The browser could not reach `cdn.jsdelivr.net` (ad blocker, DNS filter, offline). Allow that host, or self-host: download `maplibre-gl.mjs`, `maplibre-gl-worker.mjs` and `maplibre-gl.css` of the version in `MAPLIBRE_VERSION` from [jsDelivr](https://cdn.jsdelivr.net/npm/maplibre-gl/dist/) into a `maplibre/` folder next to `map-history-card.js` (served as `/local/community/map-history-card/maplibre/`). The card tries that folder first.
+- **"MapLibre could not be loaded".** The `maplibre/` folder (`maplibre-gl.mjs`, `maplibre-gl-worker.mjs`, `maplibre-gl.css`) must sit next to `map-history-card.js`. Reinstall via HACS, or for a manual install extract the release zip (not just the JS file) into the card folder.
 - **Blank grey map.** Tiles are being refused, usually because the tile token is missing. Check you run Home Assistant 2026.10+, then look at the browser console and network tab for 403 responses on `/api/map_tiles/...`.
 - **"This browser does not support WebGL2".** Your browser or device cannot do WebGL2. Home Assistant's own map falls back to a raster map there; this card does not.
 - **Card looks stale after an update.** Hard-refresh, and bump the `?v=` on a manual resource URL.
