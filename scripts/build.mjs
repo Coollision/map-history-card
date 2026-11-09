@@ -14,4 +14,5 @@ await cp(join(root, "map-history-card.js"), join(dist, "map-history-card.js"));
 for (const f of ["maplibre-gl.mjs", "maplibre-gl-worker.mjs", "maplibre-gl.css"]) {
   await cp(join(maplibre, f), join(dist, "maplibre", f));
 }
+await cp(join(root, "node_modules", "maplibre-gl", "LICENSE.txt"), join(dist, "maplibre", "LICENSE.txt"));
 console.log("built dist/ (card + maplibre/)");

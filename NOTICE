@@ -37,3 +37,5 @@ Map style and data (not part of this repository)
   are built from OpenStreetMap data, (c) OpenStreetMap contributors, available
   under the Open Database License (https://www.openstreetmap.org/copyright).
   The map shows the required attribution automatically.
+
+The release bundles MapLibre GL JS (BSD-3-Clause, see maplibre/LICENSE.txt).
