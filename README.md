@@ -41,16 +41,16 @@ Sample data only (made-up people, places and trails).
 
 ## Installation
 
-### HACS
+### Marketplace (HACS)
 
-1. Open **HACS**, search for **Map History Card** and click **Download**.
+1. Open the **Marketplace** (*Settings → Marketplace*, formerly HACS; on older Home Assistant versions open HACS), search for **Map History Card** and click **Download**.
 2. Reload the browser (hard refresh). HACS registers the resource for you; if it did not, add it under *Settings → Dashboards → ⋮ → Resources*:
    - URL: `/hacsfiles/map-history-card/map-history-card.js`
    - Type: **JavaScript module**
 
 The release is a zip with the card and its MapLibre files (`maplibre/`), so the card runs entirely from your own Home Assistant, with no CDN.
 
-If the card is not found in HACS yet, add it as a custom repository: [![Open your Home Assistant instance and open this repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Coollision&repository=map-history-card&category=plugin) or, manually, HACS → ⋮ (top right) → **Custom repositories** → `https://github.com/Coollision/map-history-card`, type **Dashboard** → **Add**.
+If the card is not found in the Marketplace yet, add it as a custom repository: [![Open your Home Assistant instance and open this repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Coollision&repository=map-history-card&category=plugin) or, manually, Marketplace/HACS → ⋮ (top right) → **Custom repositories** → `https://github.com/Coollision/map-history-card`, type **Dashboard** → **Add**.
 
 ### Manual
 
@@ -144,7 +144,7 @@ Like Home Assistant's map, every entity gets a colour from the theme's `--color-
 
 ## Troubleshooting
 
-- **"MapLibre could not be loaded".** The `maplibre/` folder (`maplibre-gl.mjs`, `maplibre-gl-worker.mjs`, `maplibre-gl.css`) must sit next to `map-history-card.js`. Reinstall via HACS, or for a manual install extract the release zip (not just the JS file) into the card folder.
+- **"MapLibre could not be loaded".** The `maplibre/` folder (`maplibre-gl.mjs`, `maplibre-gl-worker.mjs`, `maplibre-gl.css`) must sit next to `map-history-card.js`. Reinstall via the Marketplace (HACS), or for a manual install extract the release zip (not just the JS file) into the card folder.
 - **Blank grey map.** Tiles are being refused, usually because the tile token is missing. Check you run Home Assistant 2026.10+, then look at the browser console and network tab for 403 responses on `/api/map_tiles/...`.
 - **"This browser does not support WebGL2".** Your browser or device cannot do WebGL2. Home Assistant's own map falls back to a raster map there; this card does not.
 - **Card looks stale after an update.** Hard-refresh, and bump the `?v=` on a manual resource URL.
