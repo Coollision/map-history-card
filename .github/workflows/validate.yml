@@ -41,8 +41,9 @@ jobs:
       - run: npm run build
       - name: Bundle has the card and MapLibre, and loads nothing from a CDN
         run: |
-          for f in dist/map-history-card.js dist/maplibre/maplibre-gl.mjs dist/maplibre/maplibre-gl-worker.mjs dist/maplibre/maplibre-gl.css; do
+          for f in dist/map-history-card.js dist/maplibre-gl.mjs dist/maplibre-gl-worker.mjs dist/maplibre-gl.css; do
             [ -s "$f" ] || { echo "missing $f"; exit 1; }
           done
           if grep -En "https?://(cdn\.jsdelivr|unpkg)" dist/map-history-card.js; then echo "CDN URL in card"; exit 1; fi
+          if grep -rEn "jsdelivr|unpkg|esm\.sh|skypack" dist/map-history-card.js dist/maplibre-gl.mjs dist/maplibre-gl-worker.mjs; then echo "CDN reference in bundle"; exit 1; fi
           if grep -rEn "(from|import\()[ ]*[\"']https?://" dist; then echo "remote import in bundle"; exit 1; fi

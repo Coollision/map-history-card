@@ -1,7 +1,7 @@
 // Renders the README screenshots with sample data (no real names or places).
 //   cd scripts/screenshots && npm install && node screenshots.mjs [outDir]
 // Needs Google Chrome (CHROME=/path/to/chrome to override) and internet access
-// (OpenFreeMap tiles, the MapLibre CDN copy and @mdi/svg icons).
+// (OpenFreeMap tiles, the MapLibre files from node_modules, and @mdi/svg icons).
 import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
@@ -23,9 +23,11 @@ const server = http.createServer(async (req, res) => {
       return res.end(Buffer.from(await r.arrayBuffer()));
     }
     const file = url === "/" || url === "/index.html" ? path.join(here, "index.html")
-      : url === "/map-history-card.js" ? path.join(root, "map-history-card.js") : null;
+      : url === "/map-history-card.js" ? path.join(root, "map-history-card.js")
+      : /^\/maplibre-gl(-worker)?\.mjs$|^\/maplibre-gl\.css$/.test(url.split("?")[0])
+        ? path.join(root, "node_modules", "maplibre-gl", "dist", url.split("?")[0].slice(1)) : null;
     if (!file) { res.statusCode = 404; return res.end(); }
-    res.setHeader("content-type", file.endsWith(".js") ? "text/javascript" : "text/html");
+    res.setHeader("content-type", /\.m?js$/.test(file) ? "text/javascript" : file.endsWith(".css") ? "text/css" : "text/html");
     res.end(fs.readFileSync(file));
   } catch (e) { res.statusCode = 500; res.end(String(e)); }
 });
@@ -52,9 +54,9 @@ async function open(dark) {
   const p = await browser.newPage();
   await p.setViewport({ width: 1100, height: 640, deviceScaleFactor: 2 });
   p.on("pageerror", (e) => { errors++; console.log("pageerror:", String(e).slice(0, 200)); });
-  // Failed requests (404, blocked CDN) log as console errors; the local MapLibre 404 is expected.
+  // Failed requests (404, blocked network) log as console errors.
   p.on("console", (m) => {
-    if (m.type() !== "error" || /maplibre\/maplibre-gl\.mjs|status of 404/.test(m.text() + m.location().url)) return;
+    if (m.type() !== "error" || /status of 404/.test(m.text() + m.location().url)) return;
     errors++; console.log("console.error:", m.text().slice(0, 200));
   });
   await p.goto(base + (dark ? "?dark" : ""));
