@@ -1,7 +1,5 @@
 {
   "name": "Map History Card",
   "render_readme": true,
-  "homeassistant": "2026.10.0",
-  "filename": "map-history-card.zip",
-  "zip_release": true
+  "homeassistant": "2026.10.0"
 }

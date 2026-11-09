@@ -42,9 +42,7 @@ jobs:
           node-version: 22
       - run: npm ci
       - run: npm run build
-      - name: Zip the card and MapLibre for HACS
-        run: (cd dist && zip -qr ../map-history-card.zip .)
-      - name: Attach card to the release
+      - name: Attach the card and its MapLibre files to the release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "${{ needs.release-please.outputs.tag_name }}" map-history-card.zip dist/map-history-card.js --clobber
+        run: gh release upload "${{ needs.release-please.outputs.tag_name }}" dist/* --clobber

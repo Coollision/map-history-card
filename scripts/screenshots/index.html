@@ -49,7 +49,7 @@ const hass={states,config:{latitude:Z.home[0],longitude:Z.home[1]},language:"en"
  callWS:async m=>{if(m.type==="map_tiles/access_token")return{token:"x"};if(m.type==="config/entity_registry/list")return reg;
   if(m.type==="history/history_during_period"){const o={};const st=Date.parse(m.start_time);for(const e of m.entity_ids)o[e]=(hist[e]||[]).filter(r=>r.last_updated>=st);return o}return{}}};
 if(dark){document.documentElement.style.cssText+=";--card-background-color:#1c1c1c;--primary-text-color:#e1e1e1;--secondary-text-color:#9b9b9b;--divider-color:#333;--ha-color-fill-neutral-quiet-resting:rgba(255,255,255,.08)"}
-const s=document.createElement("script");s.src="/map-history-card.js";s.onload=()=>{
+const s=document.createElement("script");s.type="module";s.src="/map-history-card.js";s.onload=()=>{
  const c=document.createElement("map-history-card");
  c.setConfig({type:"custom:map-history-card",entities:Object.keys(states),default_hours:12,height:640});
  c.hass=hass;document.getElementById("wrap").appendChild(c);window.__ready=true};
