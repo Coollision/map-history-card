@@ -31,13 +31,13 @@
 //   height: 480               # optional, px (else fills the view)
 //   max_points: 300           # optional, hoverable points per trail
 
-// MapLibre 6.x (what HA ships) is ESM-only with a separate worker file, so it is
-// loaded with import(): the vendored copy next to this card first (same origin,
-// so the worker resolves next to the module), the jsDelivr copy as fallback.
-const MAPLIBRE_VERSION = "6.16.0";
+// MapLibre 6.x (what HA ships) is ESM-only with a separate worker file. The build
+// (scripts/build.mjs) ships maplibre-gl.mjs, maplibre-gl-worker.mjs and
+// maplibre-gl.css in a `maplibre/` folder next to this card, so they are loaded
+// from the card's own URL. No runtime network request leaves the Home Assistant host.
+const MAPLIBRE_VERSION = "6.16.0"; // pinned in package.json; Renovate keeps it current
 const CARD_VERSION = "0.3.1"; // x-release-please-version
-const MAPLIBRE_LOCAL = "/local/community/map-history-card/maplibre/";
-const MAPLIBRE_CDN = "https://cdn.jsdelivr.net/npm/maplibre-gl@" + MAPLIBRE_VERSION + "/dist/";
+const MAPLIBRE_BASE = new URL("./maplibre/", import.meta.url).href;
 
 // HA's map proxy (homeassistant/components/map_tiles) and the styles the frontend ships.
 const TILES_PATH = "/api/map_tiles";
@@ -284,15 +284,10 @@ const MDI_GROUP_ON = "mdi:google-circles-communities";
 const MDI_GROUP_OFF = "mdi:dots-hexagon";
 
 let maplibrePromise;
-let maplibreBase = MAPLIBRE_LOCAL; // where the stylesheet lives: next to whichever copy loaded
 function loadMapLibre() {
   if (window.maplibregl) return Promise.resolve(window.maplibregl);
   if (!maplibrePromise) {
-    const attempt = (base) => import(base + "maplibre-gl.mjs").then((mod) => {
-      maplibreBase = base;
-      return mod.Map ? mod : mod.default;
-    });
-    maplibrePromise = attempt(MAPLIBRE_LOCAL).catch(() => attempt(MAPLIBRE_CDN)).catch(() => {
+    maplibrePromise = import(MAPLIBRE_BASE + "maplibre-gl.mjs").then((mod) => (mod.Map ? mod : mod.default)).catch(() => {
       maplibrePromise = undefined;
       throw new Error("maplibre-load-failed");
     });
@@ -817,7 +812,7 @@ class MapHistoryCard extends HTMLElement {
     }
     try {
       this._maplibre = await loadMapLibre();
-      this._root.querySelector("link[data-maplibre-css]").href = maplibreBase + "maplibre-gl.css";
+      this._root.querySelector("link[data-maplibre-css]").href = MAPLIBRE_BASE + "maplibre-gl.css";
     } catch (err) {
       this._setStatus(this._t("maplibreFailed"));
       return;

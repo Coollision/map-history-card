@@ -29,17 +29,19 @@ jobs:
       - run: node --check map-history-card.js
       - name: Translations are complete
         run: node scripts/check-translations.mjs
-  cdn:
-    name: CDN assets exist
+  bundle:
+    name: Release bundle builds
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - name: MapLibre ESM, worker and CSS are reachable on jsDelivr
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run build
+      - name: Bundle has the card and MapLibre, and loads nothing from a CDN
         run: |
-          v=$(sed -n 's/^const MAPLIBRE_VERSION = "\(.*\)";/\1/p' map-history-card.js)
-          echo "MapLibre $v"
-          for f in maplibre-gl.mjs maplibre-gl-worker.mjs maplibre-gl.css; do
-            code=$(curl -s -o /dev/null -w '%{http_code}' "https://cdn.jsdelivr.net/npm/maplibre-gl@$v/dist/$f")
-            echo "$f -> $code"
-            [ "$code" = 200 ] || exit 1
+          for f in dist/map-history-card.js dist/maplibre/maplibre-gl.mjs dist/maplibre/maplibre-gl-worker.mjs dist/maplibre/maplibre-gl.css; do
+            [ -s "$f" ] || { echo "missing $f"; exit 1; }
           done
+          if grep -En "https?://(cdn\.jsdelivr|unpkg)" dist/map-history-card.js; then echo "CDN URL in card"; exit 1; fi
