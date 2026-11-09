@@ -36,27 +36,27 @@ Sample data only (made-up people, places and trails).
 |---|---|
 | Home Assistant | **2026.10 or newer.** The card uses the vector-map tile proxy and styles added in that release. |
 | Browser | WebGL2 (any current desktop or mobile browser). Without it the card shows a message instead of a map. |
-| Network | The browser must reach `cdn.jsdelivr.net` once to load the MapLibre library. Map tiles are fetched through **your own** Home Assistant instance (the card never talks to anyone else's), not from the internet directly. |
+| Network | Nothing is loaded from the internet by the card itself: MapLibre ships with it. Map tiles are fetched through **your own** Home Assistant instance (the card never talks to anyone else's), not from the internet directly. |
 | Recorder | Location history comes from the recorder, so entities need to be recorded (the default). |
 
 ## Installation
 
-### HACS (custom repository)
+### Marketplace (HACS)
 
-This card is not in the default HACS list yet, so add it as a custom repository.
-
-1. [![Open your Home Assistant instance and open this repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Coollision&repository=map-history-card&category=plugin)
-   or, manually: HACS → ⋮ (top right) → **Custom repositories** → repository `https://github.com/Coollision/map-history-card`, type **Dashboard** → **Add**.
-2. Find **Map History Card** in HACS and click **Download**.
-3. Reload the browser (hard refresh). HACS registers the resource for you; if it did not, add it under *Settings → Dashboards → ⋮ → Resources*:
+1. Open the **Marketplace** (*Settings → Marketplace*, formerly HACS; on older Home Assistant versions open HACS), search for **Map History Card** and click **Download**.
+2. Reload the browser (hard refresh). The Marketplace (HACS) registers the resource for you; if it did not, add it under *Settings → Dashboards → ⋮ → Resources*:
    - URL: `/hacsfiles/map-history-card/map-history-card.js`
    - Type: **JavaScript module**
 
+The release ships the card together with its MapLibre files, so the card runs entirely from your own Home Assistant, with no CDN.
+
+If the card is not found in the Marketplace yet, add it as a custom repository: [![Open your Home Assistant instance and open this repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Coollision&repository=map-history-card&category=plugin) or, manually, Marketplace/HACS → ⋮ (top right) → **Custom repositories** → `https://github.com/Coollision/map-history-card`, type **Dashboard** → **Add**.
+
 ### Manual
 
-1. Download `map-history-card.js` from the [latest release](https://github.com/Coollision/map-history-card/releases) (or from the `main` branch).
-2. Copy it to `<config>/www/map-history-card.js`.
-3. Add a dashboard resource: URL `/local/map-history-card.js`, type **JavaScript module**. Append `?v=2` (and bump it) after updates to defeat browser caching.
+1. Download all files from the [latest release](https://github.com/Coollision/map-history-card/releases): `map-history-card.js`, `maplibre-gl.mjs`, `maplibre-gl-worker.mjs`, `maplibre-gl.css` (and `maplibre-gl-LICENSE.txt`).
+2. Put them together in one folder, `<config>/www/map-history-card/`.
+3. Add a dashboard resource: URL `/local/map-history-card/map-history-card.js`, type **JavaScript module**. Append `?v=2` (and bump it) after updates to defeat browser caching.
 
 ## Usage
 
@@ -138,13 +138,13 @@ Like Home Assistant's map, every entity gets a colour from the theme's `--color-
 
 ## How it works
 
-1. The card loads [MapLibre GL JS](https://maplibre.org) 6.x (the line Home Assistant ships) from jsDelivr, using `import()`. If a copy sits in a `maplibre/` folder next to the card, that is used first (see Troubleshooting).
+1. The card loads [MapLibre GL JS](https://maplibre.org) 6.x (the line Home Assistant ships) from files shipped with the card (next to `map-history-card.js`), using `import()`; nothing is fetched from a CDN.
 2. It fetches Home Assistant's own style (`/static/map/light.json` or `dark.json`, picked from your theme) and asks the websocket for a tile token (`map_tiles/access_token`), refreshed every 20 minutes. Tiles are requested from your instance (`/api/map_tiles`) with that token.
 3. History is fetched with `history/history_during_period` (`significant_changes_only: false`, otherwise trackers that stay in `not_home` lose nearly every GPS update) and drawn as GeoJSON layers.
 
 ## Troubleshooting
 
-- **"MapLibre could not be loaded".** The browser could not reach `cdn.jsdelivr.net` (ad blocker, DNS filter, offline). Allow that host, or self-host: download `maplibre-gl.mjs`, `maplibre-gl-worker.mjs` and `maplibre-gl.css` of the version in `MAPLIBRE_VERSION` from [jsDelivr](https://cdn.jsdelivr.net/npm/maplibre-gl/dist/) into a `maplibre/` folder next to `map-history-card.js` (served as `/local/community/map-history-card/maplibre/`). The card tries that folder first.
+- **"MapLibre could not be loaded".** The files `maplibre-gl.mjs`, `maplibre-gl-worker.mjs` and `maplibre-gl.css` must sit next to `map-history-card.js`. Reinstall via the Marketplace (HACS), or for a manual install download all release files, not just the JS file.
 - **Blank grey map.** Tiles are being refused, usually because the tile token is missing. Check you run Home Assistant 2026.10+, then look at the browser console and network tab for 403 responses on `/api/map_tiles/...`.
 - **"This browser does not support WebGL2".** Your browser or device cannot do WebGL2. Home Assistant's own map falls back to a raster map there; this card does not.
 - **Card looks stale after an update.** Hard-refresh, and bump the `?v=` on a manual resource URL.
@@ -170,7 +170,7 @@ The English and Dutch texts were written by the author; the other eight are mach
 
 ## Updates and releases
 
-Versions follow [semantic versioning](https://semver.org) and are produced automatically from [conventional commits](https://www.conventionalcommits.org) (`feat:` → minor, `fix:` → patch, `feat!:` → major) by [release-please](https://github.com/googleapis/release-please). Each release attaches `map-history-card.js`, which HACS downloads, so HACS shows a normal update when a new version ships. The MapLibre version the card loads is kept current by Renovate, and the GitHub Actions by Dependabot. Changes are listed in [CHANGELOG.md](CHANGELOG.md) and the [releases page](https://github.com/Coollision/map-history-card/releases).
+Versions follow [semantic versioning](https://semver.org) and are produced automatically from [conventional commits](https://www.conventionalcommits.org) (`feat:` → minor, `fix:` → patch, `feat!:` → major) by [release-please](https://github.com/googleapis/release-please). Each release attaches the card plus the MapLibre files it loads from its own folder, which the Marketplace (HACS) downloads, so it shows a normal update when a new version ships. The MapLibre build is produced by `npm run build` (`scripts/build.mjs`) from the version pinned in `package.json`. The bundled MapLibre version (`package.json`) is kept current by Renovate, and the GitHub Actions by Dependabot. Changes are listed in [CHANGELOG.md](CHANGELOG.md) and the [releases page](https://github.com/Coollision/map-history-card/releases).
 
 ## Known limitations
 
