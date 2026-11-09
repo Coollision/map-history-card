@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/Coollision/map-history-card/compare/v0.3.0...v0.3.1) (2026-11-06)
+
+
+### Bug Fixes
+
+* make history loading robust (readiness gate, retry, loading hint) ([#12](https://github.com/Coollision/map-history-card/issues/12)) ([9918725](https://github.com/Coollision/map-history-card/commit/99187250737800fca20abde74fd643d7c863e2e0))
+
 ## [0.3.0](https://github.com/Coollision/map-history-card/compare/v0.2.0...v0.3.0) (2026-11-06)
 
 
