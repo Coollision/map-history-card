@@ -35,7 +35,7 @@
 // (scripts/build.mjs) ships maplibre-gl.mjs, maplibre-gl-worker.mjs and
 // maplibre-gl.css next to this card (flat, as HACS release assets), so they are loaded
 // from the card's own URL. No runtime network request leaves the Home Assistant host.
-const CARD_VERSION = "0.3.1"; // x-release-please-version
+const CARD_VERSION = "1.0.0"; // x-release-please-version
 const MAPLIBRE_BASE = new URL("./", import.meta.url).href;
 
 // HA's map proxy (homeassistant/components/map_tiles) and the styles the frontend ships.

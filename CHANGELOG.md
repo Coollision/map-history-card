@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.0](https://github.com/Coollision/map-history-card/compare/v0.3.1...v1.0.0) (2026-11-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* bundle MapLibre in the release, no runtime CDN ([#14](https://github.com/Coollision/map-history-card/issues/14))
+
+### Bug Fixes
+
+* bundle MapLibre in the release, no runtime CDN ([#14](https://github.com/Coollision/map-history-card/issues/14)) ([685f46f](https://github.com/Coollision/map-history-card/commit/685f46f527a698893522a2d237a0e46edf109de7))
+
 ## [0.3.1](https://github.com/Coollision/map-history-card/compare/v0.3.0...v0.3.1) (2026-11-06)
 
 
