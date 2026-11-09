@@ -31,13 +31,12 @@
 //   height: 480               # optional, px (else fills the view)
 //   max_points: 300           # optional, hoverable points per trail
 
-// MapLibre 6.x (what HA ships) is ESM-only with a separate worker file, so it is
-// loaded with import(): the vendored copy next to this card first (same origin,
-// so the worker resolves next to the module), the jsDelivr copy as fallback.
-const MAPLIBRE_VERSION = "6.16.0";
+// MapLibre 6.x (what HA ships) is ESM-only with a separate worker file. The build
+// (scripts/build.mjs) ships maplibre-gl.mjs, maplibre-gl-worker.mjs and
+// maplibre-gl.css next to this card (flat, as HACS release assets), so they are loaded
+// from the card's own URL. No runtime network request leaves the Home Assistant host.
 const CARD_VERSION = "0.3.1"; // x-release-please-version
-const MAPLIBRE_LOCAL = "/local/community/map-history-card/maplibre/";
-const MAPLIBRE_CDN = "https://cdn.jsdelivr.net/npm/maplibre-gl@" + MAPLIBRE_VERSION + "/dist/";
+const MAPLIBRE_BASE = new URL("./", import.meta.url).href;
 
 // HA's map proxy (homeassistant/components/map_tiles) and the styles the frontend ships.
 const TILES_PATH = "/api/map_tiles";
@@ -75,7 +74,7 @@ const STRINGS = {
     loadFailed: "Could not load history: {msg}",
     noData: "No location data found for this period.",
     noWebGL: "This browser does not support WebGL2, so the vector map cannot be drawn.",
-    maplibreFailed: "MapLibre could not be loaded (is cdn.jsdelivr.net blocked?)",
+    maplibreFailed: "MapLibre could not be loaded (are the maplibre-gl files next to the card missing? Reinstall via Marketplace (HACS))",
     mapFailed: "Could not load the map: {msg}",
     zoneTip: "{name} · radius {m} m",
     nowTitle: "{name} — now", startTitle: "{name} — start",
@@ -102,7 +101,7 @@ const STRINGS = {
     loadFailed: "Kon geschiedenis niet laden: {msg}",
     noData: "Geen locatiegegevens gevonden voor deze periode.",
     noWebGL: "Deze browser ondersteunt geen WebGL2, dus de vectorkaart kan niet getekend worden.",
-    maplibreFailed: "MapLibre kon niet geladen worden (wordt cdn.jsdelivr.net geblokkeerd?)",
+    maplibreFailed: "MapLibre kon niet geladen worden (ontbreken de maplibre-gl-bestanden naast de kaart? Installeer opnieuw via Marketplace (HACS))",
     mapFailed: "Kaart laden mislukt: {msg}",
     zoneTip: "{name} · straal {m} m",
     nowTitle: "{name} — nu", startTitle: "{name} — start",
@@ -123,7 +122,7 @@ const STRINGS = {
     loading: "Verlauf wird geladen…", loadFailed: "Verlauf konnte nicht geladen werden: {msg}",
     noData: "Keine Standortdaten für diesen Zeitraum gefunden.",
     noWebGL: "Dieser Browser unterstützt kein WebGL2, daher kann die Vektorkarte nicht dargestellt werden.",
-    maplibreFailed: "MapLibre konnte nicht geladen werden (wird cdn.jsdelivr.net blockiert?)",
+    maplibreFailed: "MapLibre konnte nicht geladen werden (fehlen die maplibre-gl-Dateien neben der Karte? Über den Marketplace (HACS) neu installieren)",
     mapFailed: "Karte konnte nicht geladen werden: {msg}", zoneTip: "{name} · Radius {m} m",
     nowTitle: "{name} — jetzt", startTitle: "{name} — Start", approxZone: "~ Position über Zone {zone} (kein GPS)",
     approxNoZone: "~ Position über Zone (kein GPS)", tipStatus: "Status", tipAccuracy: "Genauigkeit",
@@ -145,7 +144,7 @@ const STRINGS = {
     loadFailed: "Impossible de charger l’historique : {msg}",
     noData: "Aucune donnée de localisation pour cette période.",
     noWebGL: "Ce navigateur ne prend pas en charge WebGL2 ; la carte vectorielle ne peut pas être affichée.",
-    maplibreFailed: "Impossible de charger MapLibre (cdn.jsdelivr.net est-il bloqué ?)",
+    maplibreFailed: "Impossible de charger MapLibre (les fichiers maplibre-gl sont-ils absents à côté de la carte ? Réinstallez via Marketplace (HACS))",
     mapFailed: "Impossible de charger la carte : {msg}", zoneTip: "{name} · rayon {m} m",
     nowTitle: "{name} — maintenant", startTitle: "{name} — départ",
     approxZone: "~ position d’après la zone {zone} (pas de GPS)",
@@ -167,7 +166,7 @@ const STRINGS = {
     loadFailed: "No se pudo cargar el historial: {msg}",
     noData: "No se encontraron datos de ubicación para este periodo.",
     noWebGL: "Este navegador no admite WebGL2, por lo que no se puede dibujar el mapa vectorial.",
-    maplibreFailed: "No se pudo cargar MapLibre (¿está bloqueado cdn.jsdelivr.net?)",
+    maplibreFailed: "No se pudo cargar MapLibre (¿faltan los archivos maplibre-gl junto a la tarjeta? Reinstala desde Marketplace (HACS))",
     mapFailed: "No se pudo cargar el mapa: {msg}", zoneTip: "{name} · radio {m} m", nowTitle: "{name} — ahora",
     startTitle: "{name} — inicio", approxZone: "~ posición según la zona {zone} (sin GPS)",
     approxNoZone: "~ posición según la zona (sin GPS)", tipStatus: "estado", tipAccuracy: "precisión",
@@ -188,7 +187,7 @@ const STRINGS = {
     loading: "Caricamento della cronologia…", loadFailed: "Impossibile caricare la cronologia: {msg}",
     noData: "Nessun dato di posizione trovato per questo periodo.",
     noWebGL: "Questo browser non supporta WebGL2, quindi la mappa vettoriale non può essere disegnata.",
-    maplibreFailed: "Impossibile caricare MapLibre (cdn.jsdelivr.net è bloccato?)",
+    maplibreFailed: "Impossibile caricare MapLibre (mancano i file maplibre-gl accanto alla scheda? Reinstalla tramite Marketplace (HACS))",
     mapFailed: "Impossibile caricare la mappa: {msg}", zoneTip: "{name} · raggio {m} m", nowTitle: "{name} — ora",
     startTitle: "{name} — inizio", approxZone: "~ posizione dedotta dalla zona {zone} (senza GPS)",
     approxNoZone: "~ posizione dedotta dalla zona (senza GPS)", tipStatus: "stato", tipAccuracy: "precisione",
@@ -209,7 +208,7 @@ const STRINGS = {
     loadFailed: "Não foi possível carregar o histórico: {msg}",
     noData: "Não foram encontrados dados de localização para este período.",
     noWebGL: "Este navegador não suporta WebGL2, por isso o mapa vetorial não pode ser desenhado.",
-    maplibreFailed: "Não foi possível carregar o MapLibre (o cdn.jsdelivr.net está bloqueado?)",
+    maplibreFailed: "Não foi possível carregar o MapLibre (faltam os ficheiros maplibre-gl junto ao cartão? Reinstale através do Marketplace (HACS))",
     mapFailed: "Não foi possível carregar o mapa: {msg}", zoneTip: "{name} · raio {m} m", nowTitle: "{name} — agora",
     startTitle: "{name} — início", approxZone: "~ posição pela zona {zone} (sem GPS)",
     approxNoZone: "~ posição pela zona (sem GPS)", tipStatus: "estado", tipAccuracy: "precisão",
@@ -228,7 +227,7 @@ const STRINGS = {
     endAfterStart: "Data końcowa musi być późniejsza niż początkowa.", loading: "Wczytywanie historii…",
     loadFailed: "Nie udało się wczytać historii: {msg}", noData: "Brak danych o lokalizacji dla tego okresu.",
     noWebGL: "Ta przeglądarka nie obsługuje WebGL2, więc mapa wektorowa nie może zostać narysowana.",
-    maplibreFailed: "Nie udało się wczytać MapLibre (czy cdn.jsdelivr.net jest blokowany?)",
+    maplibreFailed: "Nie udało się wczytać MapLibre (czy brakuje plików maplibre-gl obok karty? Zainstaluj ponownie przez Marketplace (HACS))",
     mapFailed: "Nie udało się wczytać mapy: {msg}", zoneTip: "{name} · promień {m} m", nowTitle: "{name} — teraz",
     startTitle: "{name} — początek", approxZone: "~ pozycja ze strefy {zone} (bez GPS)",
     approxNoZone: "~ pozycja ze strefy (bez GPS)", tipStatus: "stan", tipAccuracy: "dokładność", tipSpeed: "prędkość",
@@ -246,7 +245,7 @@ const STRINGS = {
     endAfterStart: "Дата окончания должна быть позже даты начала.", loading: "Загрузка истории…",
     loadFailed: "Не удалось загрузить историю: {msg}", noData: "Нет данных о местоположении за этот период.",
     noWebGL: "Этот браузер не поддерживает WebGL2, поэтому векторную карту нельзя отобразить.",
-    maplibreFailed: "Не удалось загрузить MapLibre (не заблокирован ли cdn.jsdelivr.net?)",
+    maplibreFailed: "Не удалось загрузить MapLibre (нет файлов maplibre-gl рядом с карточкой? Переустановите через Marketplace (HACS))",
     mapFailed: "Не удалось загрузить карту: {msg}", zoneTip: "{name} · радиус {m} м", nowTitle: "{name} — сейчас",
     startTitle: "{name} — начало", approxZone: "~ позиция по зоне {zone} (без GPS)",
     approxNoZone: "~ позиция по зоне (без GPS)", tipStatus: "статус", tipAccuracy: "точность", tipSpeed: "скорость",
@@ -260,7 +259,7 @@ const STRINGS = {
     unknown: "未知", noPeople: "未找到人员。", noDevices: "未找到设备。", summary: "已选择 {n}/{total} · {range}",
     pickSome: "请选择一个或多个人员或设备。", pickStart: "请选择有效的开始日期。", endAfterStart: "结束日期必须晚于开始日期。", loading: "正在加载历史记录…",
     loadFailed: "无法加载历史记录：{msg}", noData: "此时间段内没有位置数据。", noWebGL: "此浏览器不支持 WebGL2，无法绘制矢量地图。",
-    maplibreFailed: "无法加载 MapLibre（cdn.jsdelivr.net 是否被屏蔽？）", mapFailed: "无法加载地图：{msg}", zoneTip: "{name} · 半径 {m} 米",
+    maplibreFailed: "无法加载 MapLibre（卡片旁的 maplibre-gl 文件是否缺失？请通过 Marketplace（HACS）重新安装）", mapFailed: "无法加载地图：{msg}", zoneTip: "{name} · 半径 {m} 米",
     nowTitle: "{name} — 现在", startTitle: "{name} — 起点", approxZone: "~ 根据区域 {zone} 推算的位置（无 GPS）",
     approxNoZone: "~ 根据区域推算的位置（无 GPS）", tipStatus: "状态", tipAccuracy: "精度", tipSpeed: "速度", tipAltitude: "海拔",
     tipCourse: "方向", tipBattery: "电量", tipSource: "来源", speedUnit: "km/h",
@@ -284,15 +283,10 @@ const MDI_GROUP_ON = "mdi:google-circles-communities";
 const MDI_GROUP_OFF = "mdi:dots-hexagon";
 
 let maplibrePromise;
-let maplibreBase = MAPLIBRE_LOCAL; // where the stylesheet lives: next to whichever copy loaded
 function loadMapLibre() {
   if (window.maplibregl) return Promise.resolve(window.maplibregl);
   if (!maplibrePromise) {
-    const attempt = (base) => import(base + "maplibre-gl.mjs").then((mod) => {
-      maplibreBase = base;
-      return mod.Map ? mod : mod.default;
-    });
-    maplibrePromise = attempt(MAPLIBRE_LOCAL).catch(() => attempt(MAPLIBRE_CDN)).catch(() => {
+    maplibrePromise = import(MAPLIBRE_BASE + "maplibre-gl.mjs?v=" + CARD_VERSION).then((mod) => (mod.Map ? mod : mod.default)).catch(() => {
       maplibrePromise = undefined;
       throw new Error("maplibre-load-failed");
     });
@@ -817,7 +811,7 @@ class MapHistoryCard extends HTMLElement {
     }
     try {
       this._maplibre = await loadMapLibre();
-      this._root.querySelector("link[data-maplibre-css]").href = maplibreBase + "maplibre-gl.css";
+      this._root.querySelector("link[data-maplibre-css]").href = MAPLIBRE_BASE + "maplibre-gl.css?v=" + CARD_VERSION;
     } catch (err) {
       this._setStatus(this._t("maplibreFailed"));
       return;

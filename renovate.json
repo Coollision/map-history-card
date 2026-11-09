@@ -1,17 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
-  "enabledManagers": ["custom.regex"],
-  "customManagers": [
-    {
-      "customType": "regex",
-      "description": "MapLibre GL JS version loaded (import) from jsDelivr",
-      "managerFilePatterns": ["/^map-history-card\\.js$/"],
-      "matchStrings": ["const MAPLIBRE_VERSION = \"(?<currentValue>[^\"]+)\";"],
-      "datasourceTemplate": "npm",
-      "depNameTemplate": "maplibre-gl"
-    }
-  ],
+  "enabledManagers": ["npm"],
   "packageRules": [
     {
       "matchPackageNames": ["maplibre-gl"],
