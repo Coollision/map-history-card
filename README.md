@@ -41,22 +41,22 @@ Sample data only (made-up people, places and trails).
 
 ## Installation
 
-### HACS (custom repository)
+### HACS
 
-This card is not in the default HACS list yet, so add it as a custom repository.
-
-1. [![Open your Home Assistant instance and open this repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Coollision&repository=map-history-card&category=plugin)
-   or, manually: HACS → ⋮ (top right) → **Custom repositories** → repository `https://github.com/Coollision/map-history-card`, type **Dashboard** → **Add**.
-2. Find **Map History Card** in HACS and click **Download**.
-3. Reload the browser (hard refresh). HACS registers the resource for you; if it did not, add it under *Settings → Dashboards → ⋮ → Resources*:
+1. Open **HACS**, search for **Map History Card** and click **Download**.
+2. Reload the browser (hard refresh). HACS registers the resource for you; if it did not, add it under *Settings → Dashboards → ⋮ → Resources*:
    - URL: `/hacsfiles/map-history-card/map-history-card.js`
    - Type: **JavaScript module**
 
+The release is a zip with the card and its MapLibre files (`maplibre/`), so the card runs entirely from your own Home Assistant, with no CDN.
+
+If the card is not found in HACS yet, add it as a custom repository: [![Open your Home Assistant instance and open this repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Coollision&repository=map-history-card&category=plugin) or, manually, HACS → ⋮ (top right) → **Custom repositories** → `https://github.com/Coollision/map-history-card`, type **Dashboard** → **Add**.
+
 ### Manual
 
-1. Download `map-history-card.js` from the [latest release](https://github.com/Coollision/map-history-card/releases) (or from the `main` branch).
-2. Copy it to `<config>/www/map-history-card.js`.
-3. Add a dashboard resource: URL `/local/map-history-card.js`, type **JavaScript module**. Append `?v=2` (and bump it) after updates to defeat browser caching.
+1. Download `map-history-card.zip` from the [latest release](https://github.com/Coollision/map-history-card/releases).
+2. Extract it to `<config>/www/map-history-card/`, so that `map-history-card.js` and the `maplibre/` folder sit side by side.
+3. Add a dashboard resource: URL `/local/map-history-card/map-history-card.js`, type **JavaScript module**. Append `?v=2` (and bump it) after updates to defeat browser caching.
 
 ## Usage
 
@@ -170,7 +170,7 @@ The English and Dutch texts were written by the author; the other eight are mach
 
 ## Updates and releases
 
-Versions follow [semantic versioning](https://semver.org) and are produced automatically from [conventional commits](https://www.conventionalcommits.org) (`feat:` → minor, `fix:` → patch, `feat!:` → major) by [release-please](https://github.com/googleapis/release-please). Each release attaches `map-history-card.js`, which HACS downloads, so HACS shows a normal update when a new version ships. The MapLibre version the card loads is kept current by Renovate, and the GitHub Actions by Dependabot. Changes are listed in [CHANGELOG.md](CHANGELOG.md) and the [releases page](https://github.com/Coollision/map-history-card/releases).
+Versions follow [semantic versioning](https://semver.org) and are produced automatically from [conventional commits](https://www.conventionalcommits.org) (`feat:` → minor, `fix:` → patch, `feat!:` → major) by [release-please](https://github.com/googleapis/release-please). Each release attaches `map-history-card.zip` (the card plus the MapLibre files it loads from its own folder), which HACS downloads, so HACS shows a normal update when a new version ships. The MapLibre build is produced by `npm run build` (`scripts/build.mjs`) from the version pinned in `package.json`. The MapLibre version the card loads is kept current by Renovate, and the GitHub Actions by Dependabot. Changes are listed in [CHANGELOG.md](CHANGELOG.md) and the [releases page](https://github.com/Coollision/map-history-card/releases).
 
 ## Known limitations
 

@@ -1,0 +1,11 @@
+{
+  "name": "map-history-card",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs"
+  },
+  "devDependencies": {
+    "maplibre-gl": "6.16.0"
+  }
+}
