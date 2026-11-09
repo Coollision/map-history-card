@@ -44,7 +44,7 @@ Sample data only (made-up people, places and trails).
 ### Marketplace (HACS)
 
 1. Open the **Marketplace** (*Settings → Marketplace*, formerly HACS; on older Home Assistant versions open HACS), search for **Map History Card** and click **Download**.
-2. Reload the browser (hard refresh). HACS registers the resource for you; if it did not, add it under *Settings → Dashboards → ⋮ → Resources*:
+2. Reload the browser (hard refresh). The Marketplace (HACS) registers the resource for you; if it did not, add it under *Settings → Dashboards → ⋮ → Resources*:
    - URL: `/hacsfiles/map-history-card/map-history-card.js`
    - Type: **JavaScript module**
 
@@ -170,7 +170,7 @@ The English and Dutch texts were written by the author; the other eight are mach
 
 ## Updates and releases
 
-Versions follow [semantic versioning](https://semver.org) and are produced automatically from [conventional commits](https://www.conventionalcommits.org) (`feat:` → minor, `fix:` → patch, `feat!:` → major) by [release-please](https://github.com/googleapis/release-please). Each release attaches the card plus the MapLibre files it loads from its own folder, which HACS downloads, so HACS shows a normal update when a new version ships. The MapLibre build is produced by `npm run build` (`scripts/build.mjs`) from the version pinned in `package.json`. The bundled MapLibre version (`package.json`) is kept current by Renovate, and the GitHub Actions by Dependabot. Changes are listed in [CHANGELOG.md](CHANGELOG.md) and the [releases page](https://github.com/Coollision/map-history-card/releases).
+Versions follow [semantic versioning](https://semver.org) and are produced automatically from [conventional commits](https://www.conventionalcommits.org) (`feat:` → minor, `fix:` → patch, `feat!:` → major) by [release-please](https://github.com/googleapis/release-please). Each release attaches the card plus the MapLibre files it loads from its own folder, which the Marketplace (HACS) downloads, so it shows a normal update when a new version ships. The MapLibre build is produced by `npm run build` (`scripts/build.mjs`) from the version pinned in `package.json`. The bundled MapLibre version (`package.json`) is kept current by Renovate, and the GitHub Actions by Dependabot. Changes are listed in [CHANGELOG.md](CHANGELOG.md) and the [releases page](https://github.com/Coollision/map-history-card/releases).
 
 ## Known limitations
 
