@@ -6,6 +6,6 @@
     "build": "node scripts/build.mjs"
   },
   "devDependencies": {
-    "maplibre-gl": "6.16.0"
+    "maplibre-gl": "6.18.0"
   }
 }
