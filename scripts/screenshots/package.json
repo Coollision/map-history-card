@@ -3,5 +3,5 @@
   "private": true,
   "type": "module",
   "description": "Renders the README screenshots from sample data",
-  "dependencies": { "puppeteer-core": "25.18.0" }
+  "dependencies": { "puppeteer-core": "25.18.1" }
 }
