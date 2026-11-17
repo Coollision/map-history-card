@@ -665,6 +665,9 @@ class MapHistoryCard extends HTMLElement {
   }
 
   connectedCallback() {
+    // hass-swipe-navigation skips swipes that start on elements matching its built-in
+    // ignore list, which includes ".swiper": tag the host so map drags don't change tab.
+    this.classList.add("swiper");
     window.clearTimeout(this._teardownTimer);
     this._teardownTimer = undefined;
     if (this._onWindowResize) window.addEventListener("resize", this._onWindowResize);
