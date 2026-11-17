@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.1](https://github.com/Coollision/map-history-card/compare/v1.0.0...v1.0.1) (2026-11-17)
+
+
+### Bug Fixes
+
+* **deps:** Update dependency maplibre-gl to v6.18.0 ([#16](https://github.com/Coollision/map-history-card/issues/16)) ([fcf8a46](https://github.com/Coollision/map-history-card/commit/fcf8a467cd837cc32c8669669ae8aaf1a8551ce5))
+* **deps:** Update dependency maplibre-gl to v6.19.0 ([#21](https://github.com/Coollision/map-history-card/issues/21)) ([9797699](https://github.com/Coollision/map-history-card/commit/97976991d8b095e98a92c17ec093772138d3886e))
+* **deps:** update dependency puppeteer-core to v25 ([#17](https://github.com/Coollision/map-history-card/issues/17)) ([708c8f8](https://github.com/Coollision/map-history-card/commit/708c8f8c06d11f328eaec29b498ffb03bdb9a997))
+* **deps:** update dependency puppeteer-core to v25.18.0 ([#22](https://github.com/Coollision/map-history-card/issues/22)) ([a17dd6a](https://github.com/Coollision/map-history-card/commit/a17dd6ab5f9ae74ac41ad22defd24f74d4f5b7d6))
+* **deps:** update dependency puppeteer-core to v25.18.1 ([#23](https://github.com/Coollision/map-history-card/issues/23)) ([b158d82](https://github.com/Coollision/map-history-card/commit/b158d828958090bfb6bfed7aa44de0185ebee71d))
+* stop swipe navigation from changing tab on map drags ([#19](https://github.com/Coollision/map-history-card/issues/19)) ([0b3c650](https://github.com/Coollision/map-history-card/commit/0b3c650988933303ac56046740a0a9fe99fbc9a6))
+
 ## [1.0.0](https://github.com/Coollision/map-history-card/compare/v0.3.1...v1.0.0) (2026-11-09)
 
 
